@@ -235,7 +235,7 @@ event[msg, me, dm](user, cont: "来一杯\\s+\\S") => {
         }
     }
 }
-event[msg, me, dm](user, cont: "来一份\\s+\\S") => {
+event[msg, me, dm](user, cont: "来一份\\s+\\S",req) => {
     let random_food = foods[Math.floor(Math.random() * foods.length)];
     let random_dessert = desserts[Math.floor(Math.random() * desserts.length)];
     if(cont.indexOf("来一份") === 0 || cont.indexOf("来一份") === 1){
@@ -508,5 +508,23 @@ event[msg, me, dm](user, cont: "快速解答展开法") => {
         drrr.print("/me 3、问题的解决方法:");
         drrr.print("/me [" + card3.name + "-" + position3 + "]");
         drrr.print("/me [" + card3.positions[position3] + "]");
+    }
+}
+
+event[msg, me, dm](user, cont: "牌阵列表") => {
+    let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
+    if(user.includes("猫Taro")){
+        if(cont.includes("猫Taro")){
+            drrr.print("/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+        }
+    }else{
+    if(cont.indexOf("牌阵列表") === 1 || cont.indexOf("牌阵列表") === 0){
+            if(cont.includes("牌阵列表")){
+                 drrr.print("/me 4.『快速解答展开法』");
+                 drrr.print("/me 3.『今日工作展开法』");
+                 drrr.print("/me 2.『今日压力展开法』");
+                 drrr.print("/me 1.『猫Taro』");
+            }
+        }
     }
 }
