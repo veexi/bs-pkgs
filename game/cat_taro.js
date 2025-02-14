@@ -205,7 +205,7 @@ let drinks =  [
 event join (user) => {
     let new_user = user.replaceAll("来一杯","来亿杯")
    if (guests.includes(user)){
-     drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来\u200B一杯 饮品」来获取随机推荐，或「来\u200B一杯 忘忧」自定义饮品。|输入「猫\u200BTaro」可以进行单张塔罗牌占卜。|");
+     drrr.print("/me 欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
    }else{
       guests.push(user);
       drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来\u200B一杯 饮品」来获取随机推荐，或「来\u200B一杯 忘忧」自定义饮品。|输入「猫\u200BTaro」可以进行单张塔罗牌占卜。|");
