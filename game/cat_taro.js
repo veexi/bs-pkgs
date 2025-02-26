@@ -208,7 +208,7 @@ event join (user) => {
      drrr.print("/me 欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
    }else{
       guests.push(user);
-      drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来\u200B一杯 饮品」来获取随机推荐，或「来\u200B一杯 忘忧」自定义饮品。|输入「猫\u200BTaro」可以进行单张塔罗牌占卜。|");
+      drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来\u200B一杯 饮品」来获取随机推荐，或「来\u200B一杯 忘忧」自定义饮品。|输入「牌阵\u200B列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
     }
 }
 
@@ -235,7 +235,7 @@ event[msg, me, dm](user, cont: "来一杯\\s+\\S") => {
         }
     }
 }
-event[msg, me, dm](user, cont: "来一份\\s+\\S",req) => {
+event[msg, me, dm](user, cont: "来一份\\s+\\S") => {
     let random_food = foods[Math.floor(Math.random() * foods.length)];
     let random_dessert = desserts[Math.floor(Math.random() * desserts.length)];
     if(cont.indexOf("来一份") === 0 || cont.indexOf("来一份") === 1){
@@ -255,7 +255,7 @@ event[msg, me, dm](user, cont: "来一份\\s+\\S",req) => {
     }
 }
 
-//猫猫Taro
+//猫Taro
 let tarotCards = [
     {
       "name": "O·猫",
@@ -511,6 +511,7 @@ event[msg, me, dm](user, cont: "快速解答展开法") => {
     }
 }
 
+//牌阵查询
 event[msg, me, dm](user, cont: "牌阵列表") => {
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
@@ -528,3 +529,4 @@ event[msg, me, dm](user, cont: "牌阵列表") => {
         }
     }
 }
+
