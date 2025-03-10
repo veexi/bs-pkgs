@@ -511,6 +511,39 @@ event[msg, me, dm](user, cont: "快速解答展开法") => {
     }
 }
 
+// 今日工作展开法
+event[msg, me, dm](user, cont: "快速解答展开法") => {
+    // 抽取第一张牌
+    let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+    let position1 = Math.random() < 0.5 ? "正位" : "逆位";
+
+    // 创建不包含第一张牌的新数组，从中抽取第二张牌
+    let remainingCards = tarotCards.filter(card => card.name !== card1.name);
+
+    let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+
+    let remainingCards3 = remainingCards.filter(card => card.name !== card2.name);
+
+    let card3 = remainingCards3[Math.floor(Math.random() * remainingCards3.length)];
+
+    let position2 = Math.random() < 0.5 ? "正位" : "逆位";
+    let position3 = Math.random() < 0.5 ? "正位" : "逆位";
+
+    if(cont.indexOf("快速解答展开法") === 0 || cont.indexOf("快速解答展开法") === 1 ){
+        // 输出牌阵解读
+        drrr.print("/me 1、问题的类型:");
+        drrr.print("/me [" + card1.name + "-" + position1 + "]");
+        drrr.print("/me [" + card1.positions[position1] + "]");
+
+        drrr.print("/me 2、问题的原因:");
+        drrr.print("/me [" + card2.name + "-" + position2 + "]");
+        drrr.print("/me [" + card2.positions[position2] + "]");
+
+        drrr.print("/me 3、问题的解决方法:");
+        drrr.print("/me [" + card3.name + "-" + position3 + "]");
+        drrr.print("/me [" + card3.positions[position3] + "]");
+    }
+}
 //牌阵查询
 event[msg, me, dm](user, cont: "牌阵列表") => {
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
