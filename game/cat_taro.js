@@ -413,27 +413,36 @@ let tarotCards = [
     }
   ]
 
-event[msg, me, dm](user, cont: "猫Taro") => {
+event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
     let randomCard = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position = Math.random() < 0.5 ? "正位" : "逆位";
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
         if(cont.includes("猫Taro")){
-            drrr.print("/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+            if (req.type == "dm"){
+                drrr.dm(user,"/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+            }else{
+                drrr.print("/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+            }
         }
     }else{
-    if(cont.indexOf("猫Taro") === 1 || cont.indexOf("猫Taro") === 0){
-            if(cont.includes("猫Taro")){
-                 let taro_string = randomCard.name + "-" + position;
-                 drrr.print("/me ["+taro_string+"]");
-                 drrr.print("/me ["+ randomCard.positions[position]+"]");
-            }
+        if(cont.indexOf("猫Taro") === 1 || cont.indexOf("猫Taro") === 0){
+                if(cont.includes("猫Taro")){
+                    let taro_string = randomCard.name + "-" + position;
+                    if (req.type == "dm"){
+                         drrr.dm(user,"/me ["+taro_string+"]");
+                         drrr.dm(user,"/me ["+ randomCard.positions[position]+"]");
+                    }else{
+                        drrr.print("/me ["+taro_string+"]");
+                        drrr.print("/me ["+ randomCard.positions[position]+"]");
+                    }
+                }
         }
 
     }
 }
 // 今日压力展开法
-event[msg, me, dm](user, cont: "今日压力展开法") => {
+event[msg, me, dm](user, cont: "今日压力展开法", tc, url, req) => {
     // 抽取第一张牌
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
@@ -454,9 +463,8 @@ event[msg, me, dm](user, cont: "今日压力展开法") => {
         drrr.print("/me [" + card2.positions[position2] + "]");
     }
 }
-
 // 今日工作展开法
-event[msg, me, dm](user, cont: "今日工作展开法") => {
+event[msg, me, dm](user, cont: "今日工作展开法", tc, url, req) => {
     // 抽取第一张牌
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
@@ -478,7 +486,7 @@ event[msg, me, dm](user, cont: "今日工作展开法") => {
 }
 
 // 今日工作展开法
-event[msg, me, dm](user, cont: "快速解答展开法") => {
+event[msg, me, dm](user, cont: "快速解答展开法", tc, url, req) => {
     // 抽取第一张牌
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
@@ -512,7 +520,7 @@ event[msg, me, dm](user, cont: "快速解答展开法") => {
 }
 
 // 今日工作展开法
-event[msg, me, dm](user, cont: "快速解答展开法") => {
+event[msg, me, dm](user, cont: "快速解答展开法(改)") => {
     // 抽取第一张牌
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
@@ -545,7 +553,7 @@ event[msg, me, dm](user, cont: "快速解答展开法") => {
     }
 }
 //牌阵查询
-event[msg, me, dm](user, cont: "牌阵列表") => {
+event[msg, me, dm](user, cont: "牌阵列表", tc, url, req) => {
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
         if(cont.includes("猫Taro")){
