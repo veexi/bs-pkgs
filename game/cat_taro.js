@@ -208,7 +208,7 @@ event join (user) => {
      drrr.print("/me 欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
    }else{
       guests.push(user);
-      drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来\u200B一杯 饮品」来获取随机推荐，或「来\u200B一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
+      drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
     }
 }
 
@@ -473,6 +473,38 @@ event[msg, me, dm](user, cont: "今日压力展开法", tc, url, req) => {
         }
     }
 }
+// 今日压力展开法
+event[msg, me, dm](user, cont: "明日压力展开法", tc, url, req) => {
+    // 抽取第一张牌
+    let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+    let position1 ="正位";
+
+    // 创建不包含第一张牌的新数组，从中抽取第二张牌
+    let remainingCards = tarotCards.filter(card => card.name !== card1.name);
+    let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+    let position2 ="正位";
+    if(cont.indexOf("明日压力展开法") === 0 || cont.indexOf("明日压力展开法") === 1 ){
+        if (req.type == "dm"){
+            // 输出牌阵解读
+            drrr.dm(user,"1、明日"+user+"的身心状态:");
+            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
+            drrr.dm(user,"[" + card1.positions[position1] + "]");
+
+            drrr.dm(user,"2、明日+user+"可能面对的压力:");
+            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
+            drrr.dm(user,"[" + card2.positions[position2] + "]");
+        }else{
+               // 输出牌阵解读
+               drrr.print("/me 1、明日"+user+"的身心状态:");
+               drrr.print("/me [" + card1.name + "-" + position1 + "]");
+               drrr.print("/me [" + card1.positions[position1] + "]");
+
+               drrr.print("/me 2、明日"+user+"可能面对的压力:");
+               drrr.print("/me [" + card2.name + "-" + position2 + "]");
+               drrr.print("/me [" + card2.positions[position2] + "]");
+        }
+    }
+}
 // 今日工作展开法
 event[msg, me, dm](user, cont: "今日工作展开法", tc, url, req) => {
     // 抽取第一张牌
@@ -505,7 +537,38 @@ event[msg, me, dm](user, cont: "今日工作展开法", tc, url, req) => {
         }
     }
 }
+// 今日工作展开法
+event[msg, me, dm](user, cont: "明日工作展开法", tc, url, req) => {
+    // 抽取第一张牌
+    let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+    let position1 = "正位";
 
+    // 创建不包含第一张牌的新数组，从中抽取第二张牌
+    let remainingCards = tarotCards.filter(card => card.name !== card1.name);
+    let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
+    let position2 = "正位";
+    if(cont.indexOf("明日工作展开法") === 0 || cont.indexOf("明日工作展开法") === 1 ){
+        if (req.type == "dm"){
+            // 输出牌阵解读
+            drrr.dm(user,"1、明日"+user+"的身心状态:");
+            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
+            drrr.dm(user,"[" + card1.positions[position1] + "]");
+
+            drrr.dm(user,"2、明日"+user+"的工作状态:");
+            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
+            drrr.dm(user,"[" + card2.positions[position2] + "]");
+        }else{
+               // 输出牌阵解读
+               drrr.print("/me 1、明日"+user+"的身心状态:");
+               drrr.print("/me [" + card1.name + "-" + position1 + "]");
+               drrr.print("/me [" + card1.positions[position1] + "]");
+
+               drrr.print("/me 2、明日"+user+"的工作:");
+               drrr.print("/me [" + card2.name + "-" + position2 + "]");
+               drrr.print("/me [" + card2.positions[position2] + "]");
+        }
+    }
+}
 // 今日工作展开法
 event[msg, me, dm](user, cont: "快速解答展开法", tc, url, req) => {
     // 抽取第一张牌
