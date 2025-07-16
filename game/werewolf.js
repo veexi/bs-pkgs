@@ -1186,12 +1186,12 @@ werewolf = (lang) => {
   event join (user) => setPlayer(user, user == drrr.user.name)
 
   event [msg, me] (user, cont: "^/alive") => {
-    if !names.length then drrr.print("/me start game first")
+    if !names.length then drrr.print("start game first")
     else setAlive(select(cont, names), !cont.includes("false"))
   }
 
   event [msg, me] (user, cont: "^/player") => {
-    if !names.length then drrr.print("/me start game first")
+    if !names.length then drrr.print("start game first")
     else setPlayer(select(cont, names), !cont.includes("false"))
   }
 

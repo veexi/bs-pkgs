@@ -205,10 +205,10 @@ let drinks =  [
 event join (user) => {
     let new_user = user.replaceAll("来一杯","来亿杯")
    if (guests.includes(user)){
-     drrr.print("/me 欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
+     drrr.print("欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
    }else{
       guests.push(user);
-      drrr.print("/me 欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
+      drrr.print("欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
     }
 }
 
@@ -223,14 +223,14 @@ event[msg, me, dm](user, cont: "来一杯\\s+\\S") => {
                 let foundDrink = drinks.find(d => d.name === drink);
                     if(foundDrink) {
                         // 如果找到了指定饮品，使用其配方
-                        drrr.print("/me " + foundDrink.method + "递给 " + new_user1);
+                        drrr.print("" + foundDrink.method + "递给 " + new_user1);
                     } else {
                         // 如果没找到指定饮品，使用通用回复
-                        drrr.print("/me 给 " + new_user1 + " 递上 " + drink);
+                        drrr.print("给 " + new_user1 + " 递上 " + drink);
                     }
 
             }else{
-                drrr.print("/me "+ random_drink.method +"递给 "+new_user1);
+                drrr.print(""+ random_drink.method +"递给 "+new_user1);
             }
         }
     }
@@ -244,11 +244,11 @@ event[msg, me, dm](user, cont: "来一份\\s+\\S") => {
             let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
             food = cont.replaceAll("来一份", "").trim()
             if(food === ("甜品")){
-                drrr.print("/me 给 " + new_user1 + " 递上 " +random_dessert);
+                drrr.print("给 " + new_user1 + " 递上 " +random_dessert);
             }else if(food === ("食品")){
-                drrr.print("/me 给 " + new_user1 + " 递上 " +random_food);
+                drrr.print("给 " + new_user1 + " 递上 " +random_food);
             }else{
-                drrr.print("/me 给 " + new_user1 + " 递上 " +food);
+                drrr.print("给 " + new_user1 + " 递上 " +food);
             }
         }
 
@@ -422,7 +422,7 @@ event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
             if (req.type == "dm"){
                 drrr.dm(user,"很抱歉，麻烦"+user+"名称避免酒馆关键字！");
             }else{
-                drrr.print("/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+                drrr.print("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
             }
         }
     }else{
@@ -433,8 +433,8 @@ event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
                          drrr.dm(user,"["+taro_string+"]");
                          drrr.dm(user,"["+ randomCard.positions[position]+"]");
                     }else{
-                        drrr.print("/me ["+taro_string+"]");
-                        drrr.print("/me ["+ randomCard.positions[position]+"]");
+                        drrr.print("["+taro_string+"]");
+                        drrr.print("["+ randomCard.positions[position]+"]");
                     }
                 }
         }
@@ -463,13 +463,13 @@ event[msg, me, dm](user, cont: "今日压力展开法", tc, url, req) => {
             drrr.dm(user,"[" + card2.positions[position2] + "]");
         }else{
                // 输出牌阵解读
-               drrr.print("/me 1、今日"+user+"的身心状态:");
-               drrr.print("/me [" + card1.name + "-" + position1 + "]");
-               drrr.print("/me [" + card1.positions[position1] + "]");
+               drrr.print("1、今日"+user+"的身心状态:");
+               drrr.print("[" + card1.name + "-" + position1 + "]");
+               drrr.print("[" + card1.positions[position1] + "]");
 
-               drrr.print("/me 2、今日"+user+"可能面对的压力:");
-               drrr.print("/me [" + card2.name + "-" + position2 + "]");
-               drrr.print("/me [" + card2.positions[position2] + "]");
+               drrr.print("2、今日"+user+"可能面对的压力:");
+               drrr.print("[" + card2.name + "-" + position2 + "]");
+               drrr.print("[" + card2.positions[position2] + "]");
         }
     }
 }
@@ -495,13 +495,13 @@ event[msg, me, dm](user, cont: "明日压力展开法", tc, url, req) => {
             drrr.dm(user,"[" + card2.positions[position2] + "]");
         }else{
                // 输出牌阵解读
-               drrr.print("/me 1、明日"+user+"的身心状态:");
-               drrr.print("/me [" + card1.name + "-" + position1 + "]");
-               drrr.print("/me [" + card1.positions[position1] + "]");
+               drrr.print("1、明日"+user+"的身心状态:");
+               drrr.print("[" + card1.name + "-" + position1 + "]");
+               drrr.print("[" + card1.positions[position1] + "]");
 
-               drrr.print("/me 2、明日"+user+"可能面对的压力:");
-               drrr.print("/me [" + card2.name + "-" + position2 + "]");
-               drrr.print("/me [" + card2.positions[position2] + "]");
+               drrr.print("2、明日"+user+"可能面对的压力:");
+               drrr.print("[" + card2.name + "-" + position2 + "]");
+               drrr.print("[" + card2.positions[position2] + "]");
         }
     }
 }
@@ -527,13 +527,13 @@ event[msg, me, dm](user, cont: "今日工作展开法", tc, url, req) => {
             drrr.dm(user,"[" + card2.positions[position2] + "]");
         }else{
                // 输出牌阵解读
-               drrr.print("/me 1、今日"+user+"的身心状态:");
-               drrr.print("/me [" + card1.name + "-" + position1 + "]");
-               drrr.print("/me [" + card1.positions[position1] + "]");
+               drrr.print("1、今日"+user+"的身心状态:");
+               drrr.print("[" + card1.name + "-" + position1 + "]");
+               drrr.print("[" + card1.positions[position1] + "]");
 
-               drrr.print("/me 2、今日"+user+"的工作:");
-               drrr.print("/me [" + card2.name + "-" + position2 + "]");
-               drrr.print("/me [" + card2.positions[position2] + "]");
+               drrr.print("2、今日"+user+"的工作:");
+               drrr.print("[" + card2.name + "-" + position2 + "]");
+               drrr.print("[" + card2.positions[position2] + "]");
         }
     }
 }
@@ -559,13 +559,13 @@ event[msg, me, dm](user, cont: "明日工作展开法", tc, url, req) => {
             drrr.dm(user,"[" + card2.positions[position2] + "]");
         }else{
                // 输出牌阵解读
-               drrr.print("/me 1、明日"+user+"的身心状态:");
-               drrr.print("/me [" + card1.name + "-" + position1 + "]");
-               drrr.print("/me [" + card1.positions[position1] + "]");
+               drrr.print("1、明日"+user+"的身心状态:");
+               drrr.print("[" + card1.name + "-" + position1 + "]");
+               drrr.print("[" + card1.positions[position1] + "]");
 
-               drrr.print("/me 2、明日"+user+"的工作:");
-               drrr.print("/me [" + card2.name + "-" + position2 + "]");
-               drrr.print("/me [" + card2.positions[position2] + "]");
+               drrr.print("2、明日"+user+"的工作:");
+               drrr.print("[" + card2.name + "-" + position2 + "]");
+               drrr.print("[" + card2.positions[position2] + "]");
         }
     }
 }
@@ -603,17 +603,17 @@ event[msg, me, dm](user, cont: "快速解答展开法", tc, url, req) => {
             }else{
                 // 输出牌阵解读
 
-                drrr.print("/me 1、问题的类型:");
-                drrr.print("/me [" + card1.name + "-" + position1 + "]");
-                drrr.print("/me [" + card1.positions[position1] + "]");
+                drrr.print("1、问题的类型:");
+                drrr.print("[" + card1.name + "-" + position1 + "]");
+                drrr.print("[" + card1.positions[position1] + "]");
 
-                drrr.print("/me 2、问题的原因:");
-                drrr.print("/me [" + card2.name + "-" + position2 + "]");
-                drrr.print("/me [" + card2.positions[position2] + "]");
+                drrr.print("2、问题的原因:");
+                drrr.print("[" + card2.name + "-" + position2 + "]");
+                drrr.print("[" + card2.positions[position2] + "]");
 
-                drrr.print("/me 3、问题的解决方法:");
-                drrr.print("/me [" + card3.name + "-" + position3 + "]");
-        drrr.print("/me [" + card3.positions[position3] + "]");
+                drrr.print("3、问题的解决方法:");
+                drrr.print("[" + card3.name + "-" + position3 + "]");
+        drrr.print("[" + card3.positions[position3] + "]");
             }
 
     }
@@ -639,17 +639,17 @@ event[msg, me, dm](user, cont: "快速解答展开法(改)") => {
 
     if(cont.indexOf("快速解答展开法") === 0 || cont.indexOf("快速解答展开法") === 1 ){
         // 输出牌阵解读
-        drrr.print("/me 1、问题的类型:");
-        drrr.print("/me [" + card1.name + "-" + position1 + "]");
-        drrr.print("/me [" + card1.positions[position1] + "]");
+        drrr.print("1、问题的类型:");
+        drrr.print("[" + card1.name + "-" + position1 + "]");
+        drrr.print("[" + card1.positions[position1] + "]");
 
-        drrr.print("/me 2、问题的原因:");
-        drrr.print("/me [" + card2.name + "-" + position2 + "]");
-        drrr.print("/me [" + card2.positions[position2] + "]");
+        drrr.print("2、问题的原因:");
+        drrr.print("[" + card2.name + "-" + position2 + "]");
+        drrr.print("[" + card2.positions[position2] + "]");
 
-        drrr.print("/me 3、问题的解决方法:");
-        drrr.print("/me [" + card3.name + "-" + position3 + "]");
-        drrr.print("/me [" + card3.positions[position3] + "]");
+        drrr.print("3、问题的解决方法:");
+        drrr.print("[" + card3.name + "-" + position3 + "]");
+        drrr.print("[" + card3.positions[position3] + "]");
     }
 }
 //圣火与猫的故事
@@ -706,7 +706,7 @@ event[msg, me, dm](user, cont: "牌阵列表", tc, url, req) => {
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
         if(cont.includes("猫Taro")){
-            drrr.print("/me 很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+            drrr.print("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
         }
     }else{
     if(cont.indexOf("牌阵列表") === 1 || cont.indexOf("牌阵列表") === 0){
@@ -717,10 +717,10 @@ event[msg, me, dm](user, cont: "牌阵列表", tc, url, req) => {
                      drrr.dm(user,"2.『今日压力展开法』");
                      drrr.dm(user,"1.『猫Taro』");
                  }else{
-                     drrr.print("/me 4.『快速解答展开法』");
-                     drrr.print("/me 3.『今日工作展开法』");
-                     drrr.print("/me 2.『今日压力展开法』");
-                     drrr.print("/me 1.『猫Taro』");
+                     drrr.print("4.『快速解答展开法』");
+                     drrr.print("3.『今日工作展开法』");
+                     drrr.print("2.『今日压力展开法』");
+                     drrr.print("1.『猫Taro』");
                  }
 
             }
