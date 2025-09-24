@@ -1,0 +1,511 @@
+// ==UserScript==
+// @name         Page Auto Refresh (Persistent v3 - single room) - UI fix
+// @namespace    http://tampermonkey.net/
+// @version      3.2.1
+// @description  仅在指定 drrr 房间页面生效的自动刷新脚本（持久化状态，面板可收起为小按钮并持久化） - 修复 UI 文本不可见问题
+// @author       ChatGPT (modified for UI)
+// @match        https://drrr.com/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  ////////////////////////////
+  // --- 配置：目标页面 --- //
+  ////////////////////////////
+  // 把这里的 ID 改为你想要的房间 id（例如 'sV0R7OkaTc'）
+  const TARGET_ORIGIN = 'https://drrr.com';
+  const TARGET_PATHNAME = '/room/';
+  const TARGET_ID = 'sV0R7OkaTc';
+
+  // 严格比对当前页面（忽略 hash）
+  const currentNoHash = location.href.split('#')[0];
+  const urlObj = (() => { try { return new URL(currentNoHash); } catch (e) { return null; } })();
+  if (!urlObj || urlObj.origin !== TARGET_ORIGIN || urlObj.pathname !== TARGET_PATHNAME || urlObj.searchParams.get('id') !== TARGET_ID) {
+    // 非目标页面则退出——不注入任何 DOM 或逻辑
+    return;
+  }
+
+  ////////////////////////////
+  // Inject UI-fix CSS (只改样式，不动逻辑) //
+  ////////////////////////////
+  // 解释：某些站点全局样式会把文字设为透明或使用 -webkit-text-fill-color 覆盖，
+  // 我们在面板范围内加上高优先级样式确保文字可见，同时尽量不改变按钮配色。
+  (function injectUiFixCss() {
+    const s = document.createElement('style');
+    s.id = 'tm-auto-refresh-ui-fix-style';
+    s.textContent = `
+/* 强制面板及其子元素使用深色字体，覆盖页面全局样式 */
+#tm-auto-refresh-panel, #tm-auto-refresh-panel * {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+  text-shadow: none !important;
+  /* 防止被透明/剪裁等属性影响 */
+  opacity: 1 !important;
+}
+
+/* 小圆按钮（AR）仍保留原始配色（白字）*/
+#tm-auto-refresh-toggle-btn {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+/* 保证输入框的文字可见 */
+#tm-auto-refresh-panel input,
+#tm-auto-refresh-panel input::placeholder {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important;
+}
+
+/* 让面板内的按钮如果背景为深色则文字为白色（覆盖被外部样式改变的情况） */
+#tm-auto-refresh-panel button {
+  text-shadow: none !important;
+}
+
+/* 保证面板在最上层（防止被遮盖） */
+#tm-auto-refresh-panel {
+  z-index: 999999 !important;
+}
+    `;
+    document.head.appendChild(s);
+  })();
+
+  ////////////////////////////
+  // --- 存储 key（绑定 id）--- //
+  ////////////////////////////
+  const KEY_SUFFIX = `__drrr_${TARGET_ID}`;
+  const STORAGE_KEY = 'tm_auto_refresh_settings_v3' + KEY_SUFFIX;
+  const RUNTIME_KEY = 'tm_auto_refresh_runtime_v3' + KEY_SUFFIX;
+  const PANEL_KEY = 'tm_auto_refresh_panel_v3' + KEY_SUFFIX;
+
+  const DEFAULTS = {
+    intervalSeconds: 15,
+    showTimer: true,
+    stopAfter: 0,
+    stopOnClick: false,
+    hardRefresh: false,
+    onlyWhenActive: false,
+  };
+
+  // ---------- 存取 ----------
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? Object.assign({}, DEFAULTS, JSON.parse(raw)) : Object.assign({}, DEFAULTS);
+    } catch (e) {
+      return Object.assign({}, DEFAULTS);
+    }
+  }
+  function saveSettings(s) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign({}, DEFAULTS, s)));
+  }
+  function loadRuntime() {
+    try {
+      const raw = localStorage.getItem(RUNTIME_KEY);
+      return raw ? JSON.parse(raw) : { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null };
+    } catch (e) {
+      return { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null };
+    }
+  }
+  function saveRuntime(rt) {
+    localStorage.setItem(RUNTIME_KEY, JSON.stringify(rt));
+  }
+  function loadPanelState() {
+    try {
+      const raw = localStorage.getItem(PANEL_KEY);
+      return raw ? JSON.parse(raw) : { visible: true };
+    } catch (e) {
+      return { visible: true };
+    }
+  }
+  function savePanelState(p) {
+    localStorage.setItem(PANEL_KEY, JSON.stringify(p));
+  }
+
+  // ---------- 状态 ----------
+  let settings = loadSettings();
+  let runtime = loadRuntime();
+  let panelState = loadPanelState();
+  let tickIntervalId = null;
+  let clickBound = false;
+
+  // ---------- UI（面板 + 小按钮） ----------
+  const panel = document.createElement('div');
+  panel.id = 'tm-auto-refresh-panel';
+  panel.style.cssText = `
+    position: fixed; right: 18px; bottom: 18px; width: 320px;
+    background: #fff; border: 2px solid #2dbb9b; border-radius: 10px;
+    padding: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); z-index:999999;
+    font-family: Arial, Helvetica, sans-serif; font-size:13px;
+  `;
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <strong>Auto Refresh</strong>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button id="tm-minimize" title="收起面板" style="border:none;background:#2dbb9b;color:#fff;padding:6px 8px;border-radius:6px;cursor:pointer">Close</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px">
+      <div style="margin-bottom:6px"><label>Interval (H:M:S)</label></div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <input id="tm-hours" type="number" min="0" style="width:70px;padding:6px;border:1px solid #ccc;border-radius:6px" placeholder="Hour">
+        <input id="tm-mins" type="number" min="0" max="59" style="width:70px;padding:6px;border:1px solid #ccc;border-radius:6px" placeholder="Min">
+        <input id="tm-secs" type="number" min="0" max="59" style="width:70px;padding:6px;border:1px solid #ccc;border-radius:6px" placeholder="Sec">
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button class="tm-preset" data-secs="5">5 Sec</button>
+        <button class="tm-preset" data-secs="10">10 Sec</button>
+        <button class="tm-preset" data-secs="15">15 Sec</button>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:6px">
+        <button class="tm-preset" data-secs="300">5 Min</button>
+        <button class="tm-preset" data-secs="600">10 Min</button>
+        <button class="tm-preset" data-secs="900">15 Min</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:8px">
+      <div style="font-weight:600;margin-bottom:6px">Advance Options</div>
+      <label><input id="tm-stop-after-check" type="checkbox"> Stop after </label>
+      <input id="tm-stop-after-num" type="number" min="1" style="width:60px;padding:4px;margin-left:6px" placeholder="3"> times
+      <div style="margin-top:6px"><label><input id="tm-show-timer" type="checkbox"> Show visual timer on page</label></div>
+      <div><label><input id="tm-stop-on-click" type="checkbox"> Stop refreshing if click anywhere on the page</label></div>
+      <div><label><input id="tm-hard-refresh" type="checkbox"> Hard Refresh (cache bust)</label></div>
+      <div><label><input id="tm-only-active" type="checkbox"> Only refresh when tab is active</label></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <button id="tm-start" style="padding:8px 12px;border-radius:8px;border:1px solid #2dbb9b;background:#2dbb9b;color:#fff;cursor:pointer">Start</button>
+        <button id="tm-stop" style="padding:8px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#333;cursor:pointer;margin-left:6px">Stop</button>
+      </div>
+      <div>
+        <button id="tm-save" style="padding:8px 12px;border-radius:8px;border:none;background:#2dbb9b;color:#fff;cursor:pointer">Save</button>
+      </div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:#666">
+      <span id="tm-status">Status: Stopped</span>
+      <span id="tm-timer-display" style="float:right"></span>
+    </div>
+  `;
+  document.body.appendChild(panel);
+
+  // 小按钮
+  const smallBtn = document.createElement('button');
+  smallBtn.id = 'tm-auto-refresh-toggle-btn';
+  smallBtn.title = '打开 Auto Refresh 面板';
+  smallBtn.style.cssText = `
+    position: fixed; right: 18px; bottom: 18px; width:56px; height:56px;
+    border-radius:28px; border:none; box-shadow:0 6px 18px rgba(0,0,0,0.12);
+    background:#2dbb9b; color:#fff; font-weight:700; z-index:1000000; cursor:pointer;
+    display:none;
+  `;
+  smallBtn.textContent = 'AR';
+  document.body.appendChild(smallBtn);
+
+  // 元素 refs
+  const $hours = panel.querySelector('#tm-hours');
+  const $mins = panel.querySelector('#tm-mins');
+  const $secs = panel.querySelector('#tm-secs');
+  const $presets = panel.querySelectorAll('.tm-preset');
+  const $start = panel.querySelector('#tm-start');
+  const $stop = panel.querySelector('#tm-stop');
+  const $save = panel.querySelector('#tm-save');
+  const $status = panel.querySelector('#tm-status');
+  const $timerDisplay = panel.querySelector('#tm-timer-display');
+  const $showTimer = panel.querySelector('#tm-show-timer');
+  const $stopAfterCheck = panel.querySelector('#tm-stop-after-check');
+  const $stopAfterNum = panel.querySelector('#tm-stop-after-num');
+  const $stopOnClick = panel.querySelector('#tm-stop-on-click');
+  const $hardRefresh = panel.querySelector('#tm-hard-refresh');
+  const $onlyActive = panel.querySelector('#tm-only-active');
+  const $minimize = panel.querySelector('#tm-minimize');
+
+  // 视觉计时器
+  let visualEl = null;
+  function createVisualTimer() {
+    if (visualEl) return;
+    visualEl = document.createElement('div');
+    visualEl.style.cssText = 'position:fixed;left:10px;bottom:10px;padding:8px 12px;border-radius:6px;background:rgba(45,187,155,0.9);color:#fff;z-index:999999;font-weight:600;';
+    document.body.appendChild(visualEl);
+  }
+  function removeVisualTimer() {
+    if (!visualEl) return;
+    visualEl.remove();
+    visualEl = null;
+  }
+
+  // ---------- 工具 ----------
+  function secsFromInputs() {
+    const h = Math.max(0, parseInt($hours.value || 0, 10));
+    const m = Math.max(0, parseInt($mins.value || 0, 10));
+    const s = Math.max(0, parseInt($secs.value || 0, 10));
+    return h * 3600 + m * 60 + s;
+  }
+  function formatHMS(total) {
+    if (total < 0) total = 0;
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = Math.floor(total % 60);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  function updateUIFromSettings() {
+    $hours.value = Math.floor(settings.intervalSeconds / 3600) || '';
+    $mins.value = Math.floor((settings.intervalSeconds % 3600) / 60) || '';
+    $secs.value = settings.intervalSeconds % 60 || '';
+    $showTimer.checked = !!settings.showTimer;
+    $stopAfterCheck.checked = !!(settings.stopAfter > 0);
+    $stopAfterNum.value = settings.stopAfter || '';
+    $stopOnClick.checked = !!settings.stopOnClick;
+    $hardRefresh.checked = !!settings.hardRefresh;
+    $onlyActive.checked = !!settings.onlyWhenActive;
+  }
+
+  function updateStatusText() {
+    $status.textContent = `Status: ${runtime.running ? 'Running' : 'Stopped'} / Refreshes: ${runtime.refreshCount || 0}`;
+  }
+  function updateTimerDisplay() {
+    let remainingSec = computeRemainingSeconds();
+    $timerDisplay.textContent = runtime.running ? `Next: ${formatHMS(Math.ceil(remainingSec))}` : '';
+    if (settings.showTimer) {
+      createVisualTimer();
+      visualEl.textContent = runtime.running ? `刷新倒计时 ${formatHMS(Math.ceil(remainingSec))}` : '未运行';
+    } else {
+      removeVisualTimer();
+    }
+  }
+
+  function computeRemainingSeconds() {
+    if (!runtime.running) return 0;
+    if (runtime.pausedRemaining != null) return Math.max(0, Math.ceil(runtime.pausedRemaining / 1000));
+    if (!runtime.nextFireAt) return 0;
+    return Math.max(0, Math.ceil((runtime.nextFireAt - Date.now()) / 1000));
+  }
+
+  // ---------- 启停与刷新逻辑 ----------
+  function bindStopOnClickIfNeeded() {
+    if ($stopOnClick.checked && !clickBound) {
+      document.addEventListener('click', stopOnClickHandler, { capture: true });
+      clickBound = true;
+    }
+    if (!$stopOnClick.checked && clickBound) {
+      document.removeEventListener('click', stopOnClickHandler, { capture: true });
+      clickBound = false;
+    }
+  }
+  function unbindStopOnClick() {
+    if (clickBound) {
+      document.removeEventListener('click', stopOnClickHandler, { capture: true });
+      clickBound = false;
+    }
+  }
+  function stopOnClickHandler() {
+    stopAutoRefresh();
+  }
+
+  function ensureTickRunning() {
+    if (tickIntervalId) return;
+    tickIntervalId = setInterval(() => {
+      try {
+        if (!runtime.running) {
+          updateTimerDisplay();
+          return;
+        }
+        if (settings.onlyWhenActive && document.hidden && runtime.pausedRemaining == null && runtime.nextFireAt) {
+          runtime.pausedRemaining = Math.max(0, runtime.nextFireAt - Date.now());
+          runtime.nextFireAt = null;
+          saveRuntime(runtime);
+          updateTimerDisplay();
+          return;
+        }
+        if (settings.onlyWhenActive && !document.hidden && runtime.pausedRemaining != null) {
+          runtime.nextFireAt = Date.now() + runtime.pausedRemaining;
+          runtime.pausedRemaining = null;
+          saveRuntime(runtime);
+        }
+
+        const now = Date.now();
+        if (runtime.nextFireAt && now >= runtime.nextFireAt) {
+          // 到时间 -> 执行刷新逻辑
+          runtime.refreshCount = (runtime.refreshCount || 0) + 1;
+          saveRuntime(runtime);
+
+          // 如果设置 stopAfter 且已达到次数，在刷新后置为 stopped
+          if (settings.stopAfter > 0 && (runtime.refreshCount || 0) >= settings.stopAfter) {
+            // 标记为 will stop after reload
+            runtime.running = false;
+            saveRuntime(runtime);
+            doRefresh(); // 最后一次刷新（会 reload，因此脚本结束）
+            return;
+          } else {
+            // 正常刷新（非最终）
+            doRefresh(); // 这里会 reload（或带时间戳）
+            // 下一次触发的 time 会由页面重载后的脚本重新设定（如果仍 running）
+            return;
+          }
+        } else {
+          updateTimerDisplay();
+        }
+      } catch (e) {
+        console.error('tm tick error', e);
+      }
+    }, 900);
+  }
+  function clearTick() {
+    if (tickIntervalId) {
+      clearInterval(tickIntervalId);
+      tickIntervalId = null;
+    }
+  }
+
+  function doRefresh() {
+    if (settings.onlyWhenActive && !document.hasFocus()) {
+      // 不在激活标签时，推后（不刷新）
+      return;
+    }
+    if (settings.hardRefresh) {
+      const url = new URL(location.href);
+      url.searchParams.set('_tmr', Date.now());
+      location.href = url.toString();
+    } else {
+      location.reload();
+    }
+  }
+
+  function startAutoRefreshFromUI() {
+    const interval = secsFromInputs();
+    if (!interval || interval <= 0) {
+      alert('请设置有效的刷新间隔（大于0秒）');
+      return;
+    }
+    settings.intervalSeconds = interval;
+    settings.showTimer = !!$showTimer.checked;
+    settings.stopAfter = $stopAfterCheck.checked ? (Math.max(1, parseInt($stopAfterNum.value || 0, 10) || 0)) : 0;
+    settings.stopOnClick = !!$stopOnClick.checked;
+    settings.hardRefresh = !!$hardRefresh.checked;
+    settings.onlyWhenActive = !!$onlyActive.checked;
+    saveSettings(settings);
+
+    if (!runtime.running) runtime.refreshCount = runtime.refreshCount || 0;
+    runtime.running = true;
+    runtime.nextFireAt = Date.now() + interval * 1000;
+    runtime.pausedRemaining = null;
+    saveRuntime(runtime);
+
+    bindStopOnClickIfNeeded();
+    ensureTickRunning();
+    updateStatusText();
+    updateTimerDisplay();
+  }
+
+  function stopAutoRefresh(byUser) {
+    runtime.running = false;
+    runtime.nextFireAt = null;
+    runtime.pausedRemaining = null;
+    saveRuntime(runtime);
+    unbindStopOnClick();
+    clearTick();
+    updateStatusText();
+    updateTimerDisplay();
+  }
+
+  // ---------- 小按钮与收起/展开 ----------
+  function showPanel() {
+    panel.style.display = 'block';
+    smallBtn.style.display = 'none';
+    panelState.visible = true;
+    savePanelState(panelState);
+  }
+  function hidePanelToButton() {
+    panel.style.display = 'none';
+    smallBtn.style.display = 'block';
+    panelState.visible = false;
+    savePanelState(panelState);
+  }
+
+  smallBtn.addEventListener('click', () => {
+    showPanel();
+  });
+  $minimize.addEventListener('click', () => {
+    hidePanelToButton();
+  });
+
+  // 预设按钮
+  $presets.forEach(btn => {
+    btn.style.cssText = 'padding:6px 8px;border-radius:6px;border:1px solid #cfd8d8;background:#f6fefe;cursor:pointer';
+    btn.addEventListener('click', () => {
+      const s = parseInt(btn.getAttribute('data-secs'), 10);
+      $hours.value = Math.floor(s / 3600) || '';
+      $mins.value = Math.floor((s % 3600) / 60) || '';
+      $secs.value = s % 60 || '';
+    });
+  });
+
+  // 按钮事件
+  $start.addEventListener('click', () => startAutoRefreshFromUI());
+  $stop.addEventListener('click', () => stopAutoRefresh(true));
+  $save.addEventListener('click', () => {
+    settings.showTimer = !!$showTimer.checked;
+    settings.stopAfter = $stopAfterCheck.checked ? (Math.max(1, parseInt($stopAfterNum.value || 0, 10) || 0)) : 0;
+    settings.stopOnClick = !!$stopOnClick.checked;
+    settings.hardRefresh = !!$hardRefresh.checked;
+    settings.onlyWhenActive = !!$onlyActive.checked;
+    const interval = secsFromInputs();
+    if (interval > 0) settings.intervalSeconds = interval;
+    saveSettings(settings);
+    alert('已保存设置');
+    bindStopOnClickIfNeeded();
+  });
+
+  // 可见性处理（onlyWhenActive）
+  document.addEventListener('visibilitychange', () => {
+    if (!settings.onlyWhenActive) return;
+    if (document.hidden && runtime.running && runtime.pausedRemaining == null && runtime.nextFireAt) {
+      runtime.pausedRemaining = Math.max(0, runtime.nextFireAt - Date.now());
+      runtime.nextFireAt = null;
+      saveRuntime(runtime);
+    } else if (!document.hidden && runtime.running && runtime.pausedRemaining != null) {
+      runtime.nextFireAt = Date.now() + runtime.pausedRemaining;
+      runtime.pausedRemaining = null;
+      saveRuntime(runtime);
+    }
+    updateTimerDisplay();
+  });
+
+  // ---------- 初始化 ----------
+  settings = Object.assign({}, settings, loadSettings());
+  runtime = Object.assign({}, runtime, loadRuntime());
+  panelState = Object.assign({}, panelState, loadPanelState());
+
+  updateUIFromSettings();
+  updateStatusText();
+  updateTimerDisplay();
+
+  // 根据 panelState 控制显示
+  if (panelState.visible) {
+    panel.style.display = 'block';
+    smallBtn.style.display = 'none';
+  } else {
+    panel.style.display = 'none';
+    smallBtn.style.display = 'block';
+  }
+
+  // 恢复运行（如果之前在运行）
+  if (runtime.running) {
+    bindStopOnClickIfNeeded();
+    ensureTickRunning();
+    updateStatusText();
+    updateTimerDisplay();
+  }
+
+  // 保存面板/设置/运行时在卸载前（保险）
+  window.addEventListener('beforeunload', () => {
+    saveSettings(settings);
+    saveRuntime(runtime);
+    savePanelState(panelState);
+  });
+
+})();
