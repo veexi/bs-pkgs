@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         Page Auto Refresh (Persistent v3 - single room) - UI fix
+// @name         Page Auto Refresh
 // @namespace    http://tampermonkey.net/
-// @version      3.2.1
-// @description  仅在指定 drrr 房间页面生效的自动刷新脚本（持久化状态，面板可收起为小按钮并持久化） - 修复 UI 文本不可见问题
-// @author       ChatGPT (modified for UI)
+// @version      3.2.1-patch
+// @description  仅在指定 drrr 房间页面生效的自动刷新脚本（持久化状态，面板可收起为小按钮并持久化） - 修复 UI 文本不可见问题 + 修复重载后立即触发循环刷新的 bug
+// @author       ChatGPT (patched)
 // @match        https://drrr.com/*
 // @grant        none
 // ==/UserScript==
@@ -14,56 +14,41 @@
   ////////////////////////////
   // --- 配置：目标页面 --- //
   ////////////////////////////
-  // 把这里的 ID 改为你想要的房间 id（例如 'sV0R7OkaTc'）
   const TARGET_ORIGIN = 'https://drrr.com';
   const TARGET_PATHNAME = '/room/';
   const TARGET_ID = 'sV0R7OkaTc';
 
-  // 严格比对当前页面（忽略 hash）
   const currentNoHash = location.href.split('#')[0];
   const urlObj = (() => { try { return new URL(currentNoHash); } catch (e) { return null; } })();
   if (!urlObj || urlObj.origin !== TARGET_ORIGIN || urlObj.pathname !== TARGET_PATHNAME || urlObj.searchParams.get('id') !== TARGET_ID) {
-    // 非目标页面则退出——不注入任何 DOM 或逻辑
     return;
   }
 
   ////////////////////////////
   // Inject UI-fix CSS (只改样式，不动逻辑) //
   ////////////////////////////
-  // 解释：某些站点全局样式会把文字设为透明或使用 -webkit-text-fill-color 覆盖，
-  // 我们在面板范围内加上高优先级样式确保文字可见，同时尽量不改变按钮配色。
   (function injectUiFixCss() {
     const s = document.createElement('style');
     s.id = 'tm-auto-refresh-ui-fix-style';
     s.textContent = `
-/* 强制面板及其子元素使用深色字体，覆盖页面全局样式 */
 #tm-auto-refresh-panel, #tm-auto-refresh-panel * {
   color: #111 !important;
   -webkit-text-fill-color: #111 !important;
   text-shadow: none !important;
-  /* 防止被透明/剪裁等属性影响 */
   opacity: 1 !important;
 }
-
-/* 小圆按钮（AR）仍保留原始配色（白字）*/
 #tm-auto-refresh-toggle-btn {
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
 }
-
-/* 保证输入框的文字可见 */
 #tm-auto-refresh-panel input,
 #tm-auto-refresh-panel input::placeholder {
   color: #111 !important;
   -webkit-text-fill-color: #111 !important;
 }
-
-/* 让面板内的按钮如果背景为深色则文字为白色（覆盖被外部样式改变的情况） */
 #tm-auto-refresh-panel button {
   text-shadow: none !important;
 }
-
-/* 保证面板在最上层（防止被遮盖） */
 #tm-auto-refresh-panel {
   z-index: 999999 !important;
 }
@@ -103,9 +88,9 @@
   function loadRuntime() {
     try {
       const raw = localStorage.getItem(RUNTIME_KEY);
-      return raw ? JSON.parse(raw) : { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null };
+      return raw ? JSON.parse(raw) : { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null, lastRefreshAt: null };
     } catch (e) {
-      return { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null };
+      return { running: false, nextFireAt: null, refreshCount: 0, pausedRemaining: null, lastRefreshAt: null };
     }
   }
   function saveRuntime(rt) {
@@ -129,6 +114,27 @@
   let panelState = loadPanelState();
   let tickIntervalId = null;
   let clickBound = false;
+
+  // ---------- 修复点（归一化运行时 on load） ----------
+  // 说明：如果脚本在上一页面设置了 running=true，但 nextFireAt 是过去的时间
+  // 或者为空（页面在 reload 期间丢失或已经过期），会导致脚本在页面刚加载时立刻触发刷新，形成刷新循环。
+  // 我们在初始化阶段确保：
+  //  1) 如果 runtime.running 且 nextFireAt 为 null/过期 -> 将 nextFireAt 设置为现在 + interval
+  //  2) 增加对 document.readyState 的检测，避免在页面未完成加载（complete）时触发刷新
+  function normalizeRuntimeOnLoad() {
+    try {
+      if (!runtime || !runtime.running) return;
+      const interval = settings.intervalSeconds || DEFAULTS.intervalSeconds;
+      // 如果 nextFireAt 不存在或已经在过去（<= Date.now），则推后到未来。
+      if (!runtime.nextFireAt || runtime.nextFireAt <= Date.now()) {
+        runtime.nextFireAt = Date.now() + Math.max(1, interval) * 1000;
+        runtime.pausedRemaining = null;
+        saveRuntime(runtime);
+      }
+    } catch (e) {
+      console.error('normalizeRuntimeOnLoad error', e);
+    }
+  }
 
   // ---------- UI（面板 + 小按钮） ----------
   const panel = document.createElement('div');
@@ -192,7 +198,6 @@
   `;
   document.body.appendChild(panel);
 
-  // 小按钮
   const smallBtn = document.createElement('button');
   smallBtn.id = 'tm-auto-refresh-toggle-btn';
   smallBtn.title = '打开 Auto Refresh 面板';
@@ -205,7 +210,6 @@
   smallBtn.textContent = 'AR';
   document.body.appendChild(smallBtn);
 
-  // 元素 refs
   const $hours = panel.querySelector('#tm-hours');
   const $mins = panel.querySelector('#tm-mins');
   const $secs = panel.querySelector('#tm-secs');
@@ -223,7 +227,6 @@
   const $onlyActive = panel.querySelector('#tm-only-active');
   const $minimize = panel.querySelector('#tm-minimize');
 
-  // 视觉计时器
   let visualEl = null;
   function createVisualTimer() {
     if (visualEl) return;
@@ -237,7 +240,6 @@
     visualEl = null;
   }
 
-  // ---------- 工具 ----------
   function secsFromInputs() {
     const h = Math.max(0, parseInt($hours.value || 0, 10));
     const m = Math.max(0, parseInt($mins.value || 0, 10));
@@ -285,7 +287,6 @@
     return Math.max(0, Math.ceil((runtime.nextFireAt - Date.now()) / 1000));
   }
 
-  // ---------- 启停与刷新逻辑 ----------
   function bindStopOnClickIfNeeded() {
     if ($stopOnClick.checked && !clickBound) {
       document.addEventListener('click', stopOnClickHandler, { capture: true });
@@ -310,6 +311,12 @@
     if (tickIntervalId) return;
     tickIntervalId = setInterval(() => {
       try {
+        // 如果页面还没完全加载完成，不去做触发刷新（避免在文档未完成时发生 reload 循环）
+        if (document.readyState !== 'complete') {
+          updateTimerDisplay();
+          return;
+        }
+
         if (!runtime.running) {
           updateTimerDisplay();
           return;
@@ -331,19 +338,25 @@
         if (runtime.nextFireAt && now >= runtime.nextFireAt) {
           // 到时间 -> 执行刷新逻辑
           runtime.refreshCount = (runtime.refreshCount || 0) + 1;
+          // 记录最后一次刷新时间，防止短时间内重复触发
+          runtime.lastRefreshAt = runtime.lastRefreshAt || 0;
+          // 如果上次刷新时间在 2 秒内，认为是重复快速触发，先把 nextFireAt 推后
+          if (runtime.lastRefreshAt && (now - runtime.lastRefreshAt) < 2000) {
+            runtime.nextFireAt = Date.now() + Math.max(1, settings.intervalSeconds || DEFAULTS.intervalSeconds) * 1000;
+            saveRuntime(runtime);
+            updateTimerDisplay();
+            return;
+          }
+
           saveRuntime(runtime);
 
-          // 如果设置 stopAfter 且已达到次数，在刷新后置为 stopped
           if (settings.stopAfter > 0 && (runtime.refreshCount || 0) >= settings.stopAfter) {
-            // 标记为 will stop after reload
             runtime.running = false;
             saveRuntime(runtime);
             doRefresh(); // 最后一次刷新（会 reload，因此脚本结束）
             return;
           } else {
-            // 正常刷新（非最终）
-            doRefresh(); // 这里会 reload（或带时间戳）
-            // 下一次触发的 time 会由页面重载后的脚本重新设定（如果仍 running）
+            doRefresh();
             return;
           }
         } else {
@@ -362,8 +375,14 @@
   }
 
   function doRefresh() {
+    // 防御性检查：如果页面未完全加载或者刚刚刷新过（2s 内），跳过以免进入循环
+    if (document.readyState !== 'complete') return;
+    if (runtime.lastRefreshAt && (Date.now() - runtime.lastRefreshAt) < 2000) return;
+
+    runtime.lastRefreshAt = Date.now();
+    saveRuntime(runtime);
+
     if (settings.onlyWhenActive && !document.hasFocus()) {
-      // 不在激活标签时，推后（不刷新）
       return;
     }
     if (settings.hardRefresh) {
@@ -412,7 +431,6 @@
     updateTimerDisplay();
   }
 
-  // ---------- 小按钮与收起/展开 ----------
   function showPanel() {
     panel.style.display = 'block';
     smallBtn.style.display = 'none';
@@ -433,7 +451,6 @@
     hidePanelToButton();
   });
 
-  // 预设按钮
   $presets.forEach(btn => {
     btn.style.cssText = 'padding:6px 8px;border-radius:6px;border:1px solid #cfd8d8;background:#f6fefe;cursor:pointer';
     btn.addEventListener('click', () => {
@@ -444,7 +461,6 @@
     });
   });
 
-  // 按钮事件
   $start.addEventListener('click', () => startAutoRefreshFromUI());
   $stop.addEventListener('click', () => stopAutoRefresh(true));
   $save.addEventListener('click', () => {
@@ -460,7 +476,6 @@
     bindStopOnClickIfNeeded();
   });
 
-  // 可见性处理（onlyWhenActive）
   document.addEventListener('visibilitychange', () => {
     if (!settings.onlyWhenActive) return;
     if (document.hidden && runtime.running && runtime.pausedRemaining == null && runtime.nextFireAt) {
@@ -480,11 +495,13 @@
   runtime = Object.assign({}, runtime, loadRuntime());
   panelState = Object.assign({}, panelState, loadPanelState());
 
+  // 关键修复：初始化时归一化 runtime.nextFireAt，避免过期时间导致立即刷新
+  normalizeRuntimeOnLoad();
+
   updateUIFromSettings();
   updateStatusText();
   updateTimerDisplay();
 
-  // 根据 panelState 控制显示
   if (panelState.visible) {
     panel.style.display = 'block';
     smallBtn.style.display = 'none';
@@ -493,7 +510,6 @@
     smallBtn.style.display = 'block';
   }
 
-  // 恢复运行（如果之前在运行）
   if (runtime.running) {
     bindStopOnClickIfNeeded();
     ensureTickRunning();
@@ -501,7 +517,6 @@
     updateTimerDisplay();
   }
 
-  // 保存面板/设置/运行时在卸载前（保险）
   window.addEventListener('beforeunload', () => {
     saveSettings(settings);
     saveRuntime(runtime);
