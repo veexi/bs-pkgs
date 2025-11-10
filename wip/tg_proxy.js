@@ -1,5 +1,5 @@
 urlfmt = (fix, e) => fix + e.user + fix + ": " + e.text + (if e.url then "[URL](" + e.url + ")" else "")
-
+//测试
 log2mkd = (type, e) => {
   //type, user, text, url
   console.log("log data", e);
