@@ -618,6 +618,20 @@ event[msg, me, dm](user, cont: "快速解答展开法", tc, url, req) => {
 
     }
 }
+let index = 0;
+let contents = ["/me Tips:请使用「/me 来一杯 [饮品/指定饮品名/自定义]来点单哦", "/me Tips:「/me 来一份 甜品」可以为您献上一份惊(随)喜(机)甜(食)品(物)哦", "/me Tips:输入「/me 牌阵列表」可以唤出目前支持的猫塔罗牌牌阵哦", "/me Tips:请记住，所有的指令一定要以小字的方式来触发哦，也就是使用/me 来和机器人互动触发指令"];
+
+timer 1800000 {
+  drrr.print(contents[index]);
+
+  if (index === 0) {
+    drrr.print("/me Tips:「饮品」的意思是为您随机特调一杯/「指定饮品名」需要输入菜单内已有的饮品，会直接为您调制这份饮品/「自定义」则是调制您自定义的内容给您");
+  } else if (index === 2) {
+    drrr.print("/me Tips:「牌阵列表」内的指令，请一定要带上/me，例如：【猫Taro】，请无视掉【】，输出/me 猫Taro，这样才能正确启动占卜哦");
+  }
+
+  index = (index + 1) % contents.length;
+}
 
 // 今日工作展开法
 event[msg, me, dm](user, cont: "快速解答展开法(改)") => {
