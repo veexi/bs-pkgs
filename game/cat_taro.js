@@ -633,6 +633,13 @@ timer 1800000 {
   index = (index + 1) % contents.length;
 }
 
+timer 1500000 {
+    let now = new Date();
+    let hh = String(now.getHours()).padStart(2, '0');
+    let mm = String(now.getMinutes()).padStart(2, '0');
+    drrr.print("/me "+hh + ":" + mm);
+}
+
 // 今日工作展开法
 event[msg, me, dm](user, cont: "快速解答展开法(改)") => {
     // 抽取第一张牌
