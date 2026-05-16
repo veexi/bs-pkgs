@@ -6,6 +6,7 @@
     {"type":"directory","name":"game","contents":[
       {"type":"file","name":"10p5.js"},
       {"type":"file","name":"dice.js"},
+      {"type":"file","name":"cat_taro.js"},
       {"type":"file","name":"dnd_test.js"},
       {"type":"file","name":"guess_number.js"},
       {"type":"file","name":"infer_number.js"},
