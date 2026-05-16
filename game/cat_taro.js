@@ -216,48 +216,7 @@ event join (user) => {
     }
 }
 
-event[msg, me, dm, low](user, cont: "来一杯\\s+\\S") => {
-    let random_drink = drinks[Math.floor(Math.random() * drinks.length)];
-    if(cont.indexOf("来一杯") === 0 || cont.indexOf("来一杯") === 1){
-        if(cont.includes("来一杯")){
-            let new_user = user.replaceAll("来一杯","来一\u200B杯");
-            let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
-            drink = cont.replaceAll("来一杯", "").trim()
-            if(drink !== ("饮品")){
-                let foundDrink = drinks.find(d => d.name === drink);
-                    if(foundDrink) {
-                        // 如果找到了指定饮品，使用其配方
-                        drrr.low("" + foundDrink.method + "递给 " + new_user1);
-                    } else {
-                        // 如果没找到指定饮品，使用通用回复
-                        drrr.low("给 " + new_user1 + " 递上 " + drink);
-                    }
 
-            }else{
-                drrr.low(""+ random_drink.method +"递给 "+new_user1);
-            }
-        }
-    }
-}
-event[msg, me, dm, low](user, cont: "来一份\\s+\\S") => {
-    let random_food = foods[Math.floor(Math.random() * foods.length)];
-    let random_dessert = desserts[Math.floor(Math.random() * desserts.length)];
-    if(cont.indexOf("来一份") === 0 || cont.indexOf("来一份") === 1){
-        if(cont.includes("来一份")){
-            let new_user = user.replaceAll("来一份","来一\u200B份");
-            let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
-            food = cont.replaceAll("来一份", "").trim()
-            if(food === ("甜品")){
-                drrr.low("给 " + new_user1 + " 递上 " +random_dessert);
-            }else if(food === ("食品")){
-                drrr.low("给 " + new_user1 + " 递上 " +random_food);
-            }else{
-                drrr.low("给 " + new_user1 + " 递上 " +food);
-            }
-        }
-
-    }
-}
 
 //猫Taro
 let tarotCards = [
@@ -438,60 +397,72 @@ timer 1500000 {
 }
 
 
-//圣火与猫的故事
-event[msg, me, dm ,low](user, cont: "圣火与猫", tc, url, req) => {
-    if(cont.indexOf("圣火与猫") === 1 || cont.indexOf("圣火与猫") === 0){
-        if(cont.includes("圣火与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
-            }else{
-                drrr.low("所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
-            }
-        }
+event join (user) => {
+    if (user == drrr.user.name) return;
+    let new_user = user.replaceAll("来一杯","来亿杯")
+   if (guests.includes(user)){
+     drrr.low("欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
+   }else{
+      guests.push(user);
+      drrr.low("欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
     }
 }
-//海洋与猫的故事
-event[msg, me, dm, low](user, cont: "海洋与猫", tc, url, req) => {
-    if(cont.indexOf("海洋与猫") === 1 || cont.indexOf("海洋与猫") === 0){
-        if(cont.includes("海洋与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+
+event[msg, me, dm, low](user, cont: "来一杯\\s+\\S") => {
+    if (user == drrr.user.name) return;
+    let random_drink = drinks[Math.floor(Math.random() * drinks.length)];
+    if(cont.indexOf("来一杯") === 0 || cont.indexOf("来一杯") === 1){
+        if(cont.includes("来一杯")){
+            let new_user = user.replaceAll("来一杯","来一\u200B杯");
+            let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
+            drink = cont.replaceAll("来一杯", "").trim();
+
+            let sendDrink = (method, targetUser) => {
+                let parts = method.split("。将制作完成的");
+                if(parts.length === 2) {
+                    drrr.low(parts[0] + "。");
+                    drrr.low("将制作完成的" + parts[1] + "递给 " + targetUser);
+                } else {
+                    drrr.low(method + "递给 " + targetUser);
+                }
+            };
+
+            if(drink !== ("饮品")){
+                let foundDrink = drinks.find(d => d.name === drink);
+                if(foundDrink) {
+                    sendDrink(foundDrink.method, new_user1);
+                } else {
+                    drrr.low("给 " + new_user1 + " 递上 " + drink);
+                }
             }else{
-                drrr.low("猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+                sendDrink(random_drink.method, new_user1);
             }
         }
     }
 }
 
-//天空与猫的故事
-event[msg, me, dm, low](user, cont: "天空与猫", tc, url, req) => {
-    if(cont.indexOf("天空与猫") === 1 || cont.indexOf("天空与猫") === 0){
-        if(cont.includes("天空与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+event[msg, me, dm, low](user, cont: "来一份\\s+\\S") => {
+    if (user == drrr.user.name) return;
+    let random_food = foods[Math.floor(Math.random() * foods.length)];
+    let random_dessert = desserts[Math.floor(Math.random() * desserts.length)];
+    if(cont.indexOf("来一份") === 0 || cont.indexOf("来一份") === 1){
+        if(cont.includes("来一份")){
+            let new_user = user.replaceAll("来一份","来一\u200B份");
+            let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
+            food = cont.replaceAll("来一份", "").trim()
+            if(food === ("甜品")){
+                drrr.low("给 " + new_user1 + " 递上 " +random_dessert);
+            }else if(food === ("食品")){
+                drrr.low("给 " + new_user1 + " 递上 " +random_food);
             }else{
-                drrr.low("就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+                drrr.low("给 " + new_user1 + " 递上 " +food);
             }
         }
     }
 }
 
-//大地与猫的故事
-event[msg, me, dm, low](user, cont: "大地与猫", tc, url, req) => {
-    if(cont.indexOf("大地与猫") === 1 || cont.indexOf("大地与猫") === 0){
-        if(cont.includes("大地与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
-            }else{
-                drrr.low("土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
-            }
-        }
-    }
-}
-
-	//------------------------------------------------
-	//猫Taro
 event[msg, me, dm, low](user, cont: "猫Taro", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let randomCard = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position = Math.random() < 0.5 ? "正位" : "逆位";
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
@@ -517,8 +488,8 @@ event[msg, me, dm, low](user, cont: "猫Taro", tc, url, req) => {
     }
 }
 
-// 今日压力展开法
 event[msg, me, dm, low](user, cont: "今日压力展开法", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -535,8 +506,8 @@ event[msg, me, dm, low](user, cont: "今日压力展开法", tc, url, req) => {
     }
 }
 
-// 明日压力展开法
 event[msg, me, dm, low](user, cont: "明日压力展开法", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 ="正位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -553,8 +524,8 @@ event[msg, me, dm, low](user, cont: "明日压力展开法", tc, url, req) => {
     }
 }
 
-// 今日工作展开法
 event[msg, me, dm, low](user, cont: "今日工作展开法", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -571,8 +542,8 @@ event[msg, me, dm, low](user, cont: "今日工作展开法", tc, url, req) => {
     }
 }
 
-// 明日工作展开法
 event[msg, me, dm, low](user, cont: "明日工作展开法", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = "正位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -589,8 +560,8 @@ event[msg, me, dm, low](user, cont: "明日工作展开法", tc, url, req) => {
     }
 }
 
-// 快速解答展开法
 event[msg, me, dm, low](user, cont: "快速解答展开法", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -613,8 +584,8 @@ event[msg, me, dm, low](user, cont: "快速解答展开法", tc, url, req) => {
     }
 }
 
-// 快速解答展开法(改)
 event[msg, me, dm, low](user, cont: "快速解答展开法(改)") => {
+    if (user == drrr.user.name) return;
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
@@ -630,7 +601,61 @@ event[msg, me, dm, low](user, cont: "快速解答展开法(改)") => {
         drrr.low("3、问题的解决方法:\n[" + card3.name + "-" + position3 + "]\n[" + card3.positions[position3] + "]");
     }
 }
+
+event[msg, me, dm ,low](user, cont: "圣火与猫", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    if(cont.indexOf("圣火与猫") === 1 || cont.indexOf("圣火与猫") === 0){
+        if(cont.includes("圣火与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
+            }else{
+                drrr.low("所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
+            }
+        }
+    }
+}
+
+event[msg, me, dm, low](user, cont: "海洋与猫", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    if(cont.indexOf("海洋与猫") === 1 || cont.indexOf("海洋与猫") === 0){
+        if(cont.includes("海洋与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+            }else{
+                drrr.low("猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+            }
+        }
+    }
+}
+
+event[msg, me, dm, low](user, cont: "天空与猫", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    if(cont.indexOf("天空与猫") === 1 || cont.indexOf("天空与猫") === 0){
+        if(cont.includes("天空与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+            }else{
+                drrr.low("就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+            }
+        }
+    }
+}
+
+event[msg, me, dm, low](user, cont: "大地与猫", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    if(cont.indexOf("大地与猫") === 1 || cont.indexOf("大地与猫") === 0){
+        if(cont.includes("大地与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
+            }else{
+                drrr.low("土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
+            }
+        }
+    }
+}
+
 event[msg, me, dm, low](user, cont: "牌阵列表", tc, url, req) => {
+    if (user == drrr.user.name) return;
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
         if(cont.includes("猫Taro")){
