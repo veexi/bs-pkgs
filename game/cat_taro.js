@@ -209,14 +209,14 @@ let drinks =  [
 event join (user) => {
     let new_user = user.replaceAll("来一杯","来亿杯")
    if (guests.includes(user)){
-     drrr.print("欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
+     drrr.low("欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
    }else{
       guests.push(user);
-      drrr.print("欢迎光临 " + new_user +"，有什么需要的吗？|输入「/me 来一杯 饮品」来获取随机推荐，或「/me 来一杯 忘忧」自定义饮品。|输入「/me 牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
+      drrr.low("欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
     }
 }
 
-event[msg, me, dm](user, cont: "来一杯\\s+\\S") => {
+event[msg, me, dm, low](user, cont: "来一杯\\s+\\S") => {
     let random_drink = drinks[Math.floor(Math.random() * drinks.length)];
     if(cont.indexOf("来一杯") === 0 || cont.indexOf("来一杯") === 1){
         if(cont.includes("来一杯")){
@@ -227,19 +227,19 @@ event[msg, me, dm](user, cont: "来一杯\\s+\\S") => {
                 let foundDrink = drinks.find(d => d.name === drink);
                     if(foundDrink) {
                         // 如果找到了指定饮品，使用其配方
-                        drrr.print("" + foundDrink.method + "递给 " + new_user1);
+                        drrr.low("" + foundDrink.method + "递给 " + new_user1);
                     } else {
                         // 如果没找到指定饮品，使用通用回复
-                        drrr.print("给 " + new_user1 + " 递上 " + drink);
+                        drrr.low("给 " + new_user1 + " 递上 " + drink);
                     }
 
             }else{
-                drrr.print(""+ random_drink.method +"递给 "+new_user1);
+                drrr.low(""+ random_drink.method +"递给 "+new_user1);
             }
         }
     }
 }
-event[msg, me, dm](user, cont: "来一份\\s+\\S") => {
+event[msg, me, dm, low](user, cont: "来一份\\s+\\S") => {
     let random_food = foods[Math.floor(Math.random() * foods.length)];
     let random_dessert = desserts[Math.floor(Math.random() * desserts.length)];
     if(cont.indexOf("来一份") === 0 || cont.indexOf("来一份") === 1){
@@ -248,11 +248,11 @@ event[msg, me, dm](user, cont: "来一份\\s+\\S") => {
             let new_user1 = new_user.replaceAll("猫Taro","猫\u200BTaro");
             food = cont.replaceAll("来一份", "").trim()
             if(food === ("甜品")){
-                drrr.print("给 " + new_user1 + " 递上 " +random_dessert);
+                drrr.low("给 " + new_user1 + " 递上 " +random_dessert);
             }else if(food === ("食品")){
-                drrr.print("给 " + new_user1 + " 递上 " +random_food);
+                drrr.low("给 " + new_user1 + " 递上 " +random_food);
             }else{
-                drrr.print("给 " + new_user1 + " 递上 " +food);
+                drrr.low("给 " + new_user1 + " 递上 " +food);
             }
         }
 
@@ -417,7 +417,81 @@ let tarotCards = [
     }
   ]
 
-event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
+
+
+
+
+
+let index = 0;
+let contents = ["Tips:请使用「来一杯 [饮品/指定饮品名/自定义]来点单哦", "Tips:「来一份 甜品」可以为您献上一份惊(随)喜(机)甜(食)品(物)哦", "Tips:输入「牌阵列表」可以唤出目前支持的猫塔罗牌牌阵哦", "Tips:请尽量不要使用复制来输入指令，尽可能使用手动输入来发送指令，因为复制可能会出现\">\"这个符号，会让指令无法触发哦"];
+
+timer 1800000 {
+  drrr.low(contents[index]);
+  index = (index + 1) % contents.length;
+}
+
+timer 1500000 {
+    let now = new Date();
+    let hh = String(now.getHours()).padStart(2, '0');
+    let mm = String(now.getMinutes()).padStart(2, '0');
+    drrr.low(hh + ":" + mm);
+}
+
+
+//圣火与猫的故事
+event[msg, me, dm ,low](user, cont: "圣火与猫", tc, url, req) => {
+    if(cont.indexOf("圣火与猫") === 1 || cont.indexOf("圣火与猫") === 0){
+        if(cont.includes("圣火与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
+            }else{
+                drrr.low("所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
+            }
+        }
+    }
+}
+//海洋与猫的故事
+event[msg, me, dm, low](user, cont: "海洋与猫", tc, url, req) => {
+    if(cont.indexOf("海洋与猫") === 1 || cont.indexOf("海洋与猫") === 0){
+        if(cont.includes("海洋与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+            }else{
+                drrr.low("猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
+            }
+        }
+    }
+}
+
+//天空与猫的故事
+event[msg, me, dm, low](user, cont: "天空与猫", tc, url, req) => {
+    if(cont.indexOf("天空与猫") === 1 || cont.indexOf("天空与猫") === 0){
+        if(cont.includes("天空与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+            }else{
+                drrr.low("就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
+            }
+        }
+    }
+}
+
+//大地与猫的故事
+event[msg, me, dm, low](user, cont: "大地与猫", tc, url, req) => {
+    if(cont.indexOf("大地与猫") === 1 || cont.indexOf("大地与猫") === 0){
+        if(cont.includes("大地与猫")){
+            if (req.type == "dm"){
+                drrr.dm(user,"土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
+            }else{
+                drrr.low("土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
+            }
+        }
+    }
+}
+
+	//------------------------------------------------
+	//猫Taro
+event[msg, me, dm, low](user, cont: "猫Taro", tc, url, req) => {
     let randomCard = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position = Math.random() < 0.5 ? "正位" : "逆位";
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
@@ -426,7 +500,7 @@ event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
             if (req.type == "dm"){
                 drrr.dm(user,"很抱歉，麻烦"+user+"名称避免酒馆关键字！");
             }else{
-                drrr.print("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+                drrr.low("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
             }
         }
     }else{
@@ -434,322 +508,145 @@ event[msg, me, dm](user, cont: "猫Taro", tc, url, req) => {
                 if(cont.includes("猫Taro")){
                     let taro_string = randomCard.name + "-" + position;
                     if (req.type == "dm"){
-                         drrr.dm(user,"["+taro_string+"]");
-                         drrr.dm(user,"["+ randomCard.positions[position]+"]");
+                         drrr.dm(user,"["+taro_string+"]\n["+ randomCard.positions[position]+"]");
                     }else{
-                        drrr.print("["+taro_string+"]");
-                        drrr.print("["+ randomCard.positions[position]+"]");
+                        drrr.low("["+taro_string+"]\n["+ randomCard.positions[position]+"]");
                     }
                 }
         }
-
     }
 }
+
 // 今日压力展开法
-event[msg, me, dm](user, cont: "今日压力展开法", tc, url, req) => {
-    // 抽取第一张牌
+event[msg, me, dm, low](user, cont: "今日压力展开法", tc, url, req) => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
     let position2 = Math.random() < 0.5 ? "正位" : "逆位";
     if(cont.indexOf("今日压力展开法") === 0 || cont.indexOf("今日压力展开法") === 1 ){
         if (req.type == "dm"){
-            // 输出牌阵解读
-            drrr.dm(user,"1、今日"+user+"的身心状态:");
-            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
-            drrr.dm(user,"[" + card1.positions[position1] + "]");
-
-            drrr.dm(user,"2、今日"+user+"可能面对的压力:");
-            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
-            drrr.dm(user,"[" + card2.positions[position2] + "]");
+            drrr.dm(user,"1、今日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.dm(user,"2、今日"+user+"可能面对的压力:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }else{
-               // 输出牌阵解读
-               drrr.print("1、今日"+user+"的身心状态:");
-               drrr.print("[" + card1.name + "-" + position1 + "]");
-               drrr.print("[" + card1.positions[position1] + "]");
-
-               drrr.print("2、今日"+user+"可能面对的压力:");
-               drrr.print("[" + card2.name + "-" + position2 + "]");
-               drrr.print("[" + card2.positions[position2] + "]");
+            drrr.low("1、今日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.low("2、今日"+user+"可能面对的压力:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }
     }
 }
-// 今日压力展开法
-event[msg, me, dm](user, cont: "明日压力展开法", tc, url, req) => {
-    // 抽取第一张牌
+
+// 明日压力展开法
+event[msg, me, dm, low](user, cont: "明日压力展开法", tc, url, req) => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 ="正位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
     let position2 ="正位";
     if(cont.indexOf("明日压力展开法") === 0 || cont.indexOf("明日压力展开法") === 1 ){
         if (req.type == "dm"){
-            // 输出牌阵解读
-            drrr.dm(user,"1、明日"+user+"的身心状态:");
-            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
-            drrr.dm(user,"[" + card1.positions[position1] + "]");
-
-            drrr.dm(user,"2、明日"+user+"可能面对的压力:");
-            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
-            drrr.dm(user,"[" + card2.positions[position2] + "]");
+            drrr.dm(user,"1、明日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.dm(user,"2、明日"+user+"可能面对的压力:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }else{
-               // 输出牌阵解读
-               drrr.print("1、明日"+user+"的身心状态:");
-               drrr.print("[" + card1.name + "-" + position1 + "]");
-               drrr.print("[" + card1.positions[position1] + "]");
-
-               drrr.print("2、明日"+user+"可能面对的压力:");
-               drrr.print("[" + card2.name + "-" + position2 + "]");
-               drrr.print("[" + card2.positions[position2] + "]");
+            drrr.low("1、明日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.low("2、明日"+user+"可能面对的压力:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }
     }
 }
+
 // 今日工作展开法
-event[msg, me, dm](user, cont: "今日工作展开法", tc, url, req) => {
-    // 抽取第一张牌
+event[msg, me, dm, low](user, cont: "今日工作展开法", tc, url, req) => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
     let position2 = Math.random() < 0.5 ? "正位" : "逆位";
     if(cont.indexOf("今日工作展开法") === 0 || cont.indexOf("今日工作展开法") === 1 ){
         if (req.type == "dm"){
-            // 输出牌阵解读
-            drrr.dm(user,"1、今日"+user+"的身心状态:");
-            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
-            drrr.dm(user,"[" + card1.positions[position1] + "]");
-
-            drrr.dm(user,"2、今日"+user+"的工作状态:");
-            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
-            drrr.dm(user,"[" + card2.positions[position2] + "]");
+            drrr.dm(user,"1、今日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.dm(user,"2、今日"+user+"的工作状态:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }else{
-               // 输出牌阵解读
-               drrr.print("1、今日"+user+"的身心状态:");
-               drrr.print("[" + card1.name + "-" + position1 + "]");
-               drrr.print("[" + card1.positions[position1] + "]");
-
-               drrr.print("2、今日"+user+"的工作:");
-               drrr.print("[" + card2.name + "-" + position2 + "]");
-               drrr.print("[" + card2.positions[position2] + "]");
+            drrr.low("1、今日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.low("2、今日"+user+"的工作:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }
     }
 }
-// 今日工作展开法
-event[msg, me, dm](user, cont: "明日工作展开法", tc, url, req) => {
-    // 抽取第一张牌
+
+// 明日工作展开法
+event[msg, me, dm, low](user, cont: "明日工作展开法", tc, url, req) => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = "正位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
     let position2 = "正位";
     if(cont.indexOf("明日工作展开法") === 0 || cont.indexOf("明日工作展开法") === 1 ){
         if (req.type == "dm"){
-            // 输出牌阵解读
-            drrr.dm(user,"1、明日"+user+"的身心状态:");
-            drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
-            drrr.dm(user,"[" + card1.positions[position1] + "]");
-
-            drrr.dm(user,"2、明日"+user+"的工作状态:");
-            drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
-            drrr.dm(user,"[" + card2.positions[position2] + "]");
+            drrr.dm(user,"1、明日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.dm(user,"2、明日"+user+"的工作状态:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }else{
-               // 输出牌阵解读
-               drrr.print("1、明日"+user+"的身心状态:");
-               drrr.print("[" + card1.name + "-" + position1 + "]");
-               drrr.print("[" + card1.positions[position1] + "]");
-
-               drrr.print("2、明日"+user+"的工作:");
-               drrr.print("[" + card2.name + "-" + position2 + "]");
-               drrr.print("[" + card2.positions[position2] + "]");
+            drrr.low("1、明日"+user+"的身心状态:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+            drrr.low("2、明日"+user+"的工作:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
         }
     }
 }
-// 今日工作展开法
-event[msg, me, dm](user, cont: "快速解答展开法", tc, url, req) => {
-    // 抽取第一张牌
+
+// 快速解答展开法
+event[msg, me, dm, low](user, cont: "快速解答展开法", tc, url, req) => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
-
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
-
     let remainingCards3 = remainingCards.filter(card => card.name !== card2.name);
-
     let card3 = remainingCards3[Math.floor(Math.random() * remainingCards3.length)];
-
     let position2 = Math.random() < 0.5 ? "正位" : "逆位";
     let position3 = Math.random() < 0.5 ? "正位" : "逆位";
 
     if(cont.indexOf("快速解答展开法") === 0 || cont.indexOf("快速解答展开法") === 1 ){
             if (req.type == "dm"){
-                // 输出牌阵解读
-                drrr.dm(user,"1、问题的类型:");
-                drrr.dm(user,"[" + card1.name + "-" + position1 + "]");
-                drrr.dm(user,"[" + card1.positions[position1] + "]");
-
-                drrr.dm(user,"2、问题的原因:");
-                drrr.dm(user,"[" + card2.name + "-" + position2 + "]");
-                drrr.dm(user,"[" + card2.positions[position2] + "]");
-
-                drrr.dm(user,"3、问题的解决方法:");
-                drrr.dm(user,"[" + card3.name + "-" + position3 + "]");
+                drrr.dm(user,"1、问题的类型:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+                drrr.dm(user,"2、问题的原因:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
+                drrr.dm(user,"3、问题的解决方法:\n[" + card3.name + "-" + position3 + "]");
             }else{
-                // 输出牌阵解读
-
-                drrr.print("1、问题的类型:");
-                drrr.print("[" + card1.name + "-" + position1 + "]");
-                drrr.print("[" + card1.positions[position1] + "]");
-
-                drrr.print("2、问题的原因:");
-                drrr.print("[" + card2.name + "-" + position2 + "]");
-                drrr.print("[" + card2.positions[position2] + "]");
-
-                drrr.print("3、问题的解决方法:");
-                drrr.print("[" + card3.name + "-" + position3 + "]");
-        drrr.print("[" + card3.positions[position3] + "]");
+                drrr.low("1、问题的类型:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+                drrr.low("2、问题的原因:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
+                drrr.low("3、问题的解决方法:\n[" + card3.name + "-" + position3 + "]\n[" + card3.positions[position3] + "]");
             }
-
     }
 }
-let index = 0;
-let contents = ["/me Tips:请使用「/me 来一杯 [饮品/指定饮品名/自定义]来点单哦", "/me Tips:「/me 来一份 甜品」可以为您献上一份惊(随)喜(机)甜(食)品(物)哦", "/me Tips:输入「/me 牌阵列表」可以唤出目前支持的猫塔罗牌牌阵哦", "/me Tips:请记住，所有的指令一定要以小字的方式来触发哦，也就是使用/me 来和机器人互动触发指令","/me Tips:请尽量不要使用复制来输入指令，尽可能使用手动输入来发送指令，因为复制可能会出现\">\"这个符号，会让指令无法触发哦"];
 
-timer 1800000 {
-  drrr.print(contents[index]);
-
-  if (index === 0) {
-    drrr.print("/me Tips:「饮品」的意思是为您随机特调一杯/「指定饮品名」需要输入菜单内已有的饮品，会直接为您调制这份饮品/「自定义」则是调制您自定义的内容给您");
-  } else if (index === 2) {
-    drrr.print("/me Tips:「牌阵列表」内的指令，请一定要带上/me，例如：【猫Taro】，请无视掉【】，输出/me 猫Taro，这样才能正确启动占卜哦");
-  }
-
-  index = (index + 1) % contents.length;
-}
-
-timer 1500000 {
-    let now = new Date();
-    let hh = String(now.getHours()).padStart(2, '0');
-    let mm = String(now.getMinutes()).padStart(2, '0');
-    drrr.print("/me "+hh + ":" + mm);
-}
-
-// 今日工作展开法
-event[msg, me, dm](user, cont: "快速解答展开法(改)") => {
-    // 抽取第一张牌
+// 快速解答展开法(改)
+event[msg, me, dm, low](user, cont: "快速解答展开法(改)") => {
     let card1 = tarotCards[Math.floor(Math.random() * tarotCards.length)];
     let position1 = Math.random() < 0.5 ? "正位" : "逆位";
-
-    // 创建不包含第一张牌的新数组，从中抽取第二张牌
     let remainingCards = tarotCards.filter(card => card.name !== card1.name);
-
     let card2 = remainingCards[Math.floor(Math.random() * remainingCards.length)];
-
     let remainingCards3 = remainingCards.filter(card => card.name !== card2.name);
-
     let card3 = remainingCards3[Math.floor(Math.random() * remainingCards3.length)];
-
     let position2 = Math.random() < 0.5 ? "正位" : "逆位";
     let position3 = Math.random() < 0.5 ? "正位" : "逆位";
 
     if(cont.indexOf("快速解答展开法") === 0 || cont.indexOf("快速解答展开法") === 1 ){
-        // 输出牌阵解读
-        drrr.print("1、问题的类型:");
-        drrr.print("[" + card1.name + "-" + position1 + "]");
-        drrr.print("[" + card1.positions[position1] + "]");
-
-        drrr.print("2、问题的原因:");
-        drrr.print("[" + card2.name + "-" + position2 + "]");
-        drrr.print("[" + card2.positions[position2] + "]");
-
-        drrr.print("3、问题的解决方法:");
-        drrr.print("[" + card3.name + "-" + position3 + "]");
-        drrr.print("[" + card3.positions[position3] + "]");
+        drrr.low("1、问题的类型:\n[" + card1.name + "-" + position1 + "]\n[" + card1.positions[position1] + "]");
+        drrr.low("2、问题的原因:\n[" + card2.name + "-" + position2 + "]\n[" + card2.positions[position2] + "]");
+        drrr.low("3、问题的解决方法:\n[" + card3.name + "-" + position3 + "]\n[" + card3.positions[position3] + "]");
     }
 }
-//圣火与猫的故事
-event[msg, me, dm](user, cont: "圣火与猫", tc, url, req) => {
-    if(cont.indexOf("圣火与猫") === 1 || cont.indexOf("圣火与猫") === 0){
-        if(cont.includes("圣火与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
-            }else{
-                drrr.print("所有的猫都崇拜热量。我们寻找有阳光的地点，在热乎乎的石头上伸展开身体，跟同伴温暖地蜷缩在一起。对于圣火与猫宗教而言，比起单纯的温暖，火焰意味着更多。是内在闪耀的光亮，是激励人心的高贵的猫族精神在追求卓越。充满激情的恋人们在选择伴侣时，理由正当，圣火与猫是技巧超高的战士。勇敢的历险和形象化，它们热爱黑夜也热爱点亮黑夜的火焰。好奇心和勇气通常引领它们进入充满挑战的境地，因为它们都是无畏的。火族猫的起源随着时间的流逝和神话的传承已变得模糊，在英勇和征服故事中夸张地把火族猫描述成伟大的纺纱工。它们称自己是太阳女神 Sekhment 的后代，它们作为圣殿守护者和猫教皇的传承由来已久的故事是真的。它们是宗族中最高尚的，火族猫寻求能滋养它们灵魂的神秘猎物。");
-            }
-        }
-    }
-}
-//海洋与猫的故事
-event[msg, me, dm](user, cont: "海洋与猫", tc, url, req) => {
-    if(cont.indexOf("海洋与猫") === 1 || cont.indexOf("海洋与猫") === 0){
-        if(cont.includes("海洋与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
-            }else{
-                drrr.print("猫与水是老朋友了，当然我们可以选择友谊的方式。有的会游泳，从高空跳水。有的仅在玩耍时向喷泉伸出自己漂亮的小爪子，或只是单纯地看着闪闪发光的喷泉。水是水族猫的母亲，恋人，家和幸福。他们的心向往海边由月亮引起的潮汐运动，河流动时创造的音乐，阳光照耀下的湖光粼粼波光。水族猫是所有猫中最超然的。他们知晓你所想，你可以相信他们并分享你的秘密。水族猫情绪化，喜怒无常，深沉和明智。宗族神话说水族猫来自一个大岛，现已沉入海底，一些猫变成 MERCAT 仍然生活在海底。当它们凝视时，流露出只有他们宗族可以看到的那种梦幻般的眼神，也许它们听到的就是 MERCAT 的歌声。");
-            }
-        }
-    }
-}
-
-//天空与猫的故事
-event[msg, me, dm](user, cont: "天空与猫", tc, url, req) => {
-    if(cont.indexOf("天空与猫") === 1 || cont.indexOf("天空与猫") === 0){
-        if(cont.includes("天空与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
-            }else{
-                drrr.print("就跟他们的齿爪一样，风族猫的性格也是非常的犀利。他们不信任任何人，甚至他们自己的族人。他们一年四季露天生活，他们怀疑墙的保护是限制和诱惑。这一弱点使他们防范心强，紧张，好斗。风族猫是机智无情的敌人。如果他们不能找到真正的猎物，他们就会知道麻烦。那些不合群的就待在宗群领地的边缘处，其他的拉帮结伙成抢劫团伙欺负那些大摇大摆通过他们领地的比较温和的猫。打架是家常便事，在交配季节尤其激烈。风族的猫只在意他们的爪子，对公共意识毫不关心。最明智的是学会控制自己的脾气，充分利用自己的智慧。其他的生命则是短暂充满暴力的。风族起源于那些流放猫，和平和地生活而被迫离开的。经历数代后，等级就逐渐形成，他们的国王和王后都是通过战争取得的，通过世袭传承固定下来的。目前没有人敢挑战他们。");
-            }
-        }
-    }
-}
-
-//大地与猫的故事
-event[msg, me, dm](user, cont: "大地与猫", tc, url, req) => {
-    if(cont.indexOf("大地与猫") === 1 || cont.indexOf("大地与猫") === 0){
-        if(cont.includes("大地与猫")){
-            if (req.type == "dm"){
-                drrr.dm(user,"土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
-            }else{
-                drrr.print("土族称他们是猫族的第一支。且不论真假，它讲出了最重要的事情：历史，稳定，安全。土族猫深深地隶属于他们的领地。他们一旦找到能给他们和平感觉的好地方，他们就不会再动。从内心深处安于一隅，欣赏自己所拥有的和美食。自然的意趣吸引着他们，他们与其他动物的互动多于另外三个宗族（除了猎物）。尽管若需要，土族猫愿意为自己的所有而战，他们更可能通过共同的努力等待对手退出或把他们排挤出局。他们对自己的宗族感到自豪并保存了宗族的传说并传承着。虽然宗族排首位，土族猫本性慷慨，对贫穷的人也欢迎，关心所有人的福祉。和善，安静，喜欢舒适，土族猫在他们的世界里自在的生活着。");
-            }
-        }
-    }
-}
-event[msg, me, dm](user, cont: "牌阵列表", tc, url, req) => {
+event[msg, me, dm, low](user, cont: "牌阵列表", tc, url, req) => {
     let user_name = user.replaceAll("猫Taro","猫\u200BTaro");
     if(user.includes("猫Taro")){
         if(cont.includes("猫Taro")){
-            drrr.print("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
+            drrr.low("很抱歉，麻烦"+user+"名称避免酒馆关键字！");
         }
     }else{
-    if(cont.indexOf("牌阵列表") === 1 || cont.indexOf("牌阵列表") === 0){
+        if(cont.indexOf("牌阵列表") === 1 || cont.indexOf("牌阵列表") === 0){
             if(cont.includes("牌阵列表")){
                 if (req.type == "dm"){
-                     drrr.dm(user,"4.『快速解答展开法』");
-                     drrr.dm(user,"3.『今日工作展开法』");
-                     drrr.dm(user,"2.『今日压力展开法』");
-                     drrr.dm(user,"1.『猫Taro』");
+                     drrr.dm(user,"『猫Taro』\n『快速解答展开法』\n『今日工作展开法』\n『今日压力展开法』");
                  }else{
-                     drrr.print("4.『快速解答展开法』");
-                     drrr.print("3.『今日工作展开法』");
-                     drrr.print("2.『今日压力展开法』");
-                     drrr.print("1.『猫Taro』");
+                     drrr.low("『猫Taro』\n『快速解答展开法』\n『今日工作展开法』\n『今日压力展开法』");
                  }
-
             }
         }
     }
 }
+
 
