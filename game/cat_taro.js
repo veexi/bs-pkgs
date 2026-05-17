@@ -206,15 +206,6 @@ let drinks =  [
               }
             ]
 
-event join (user) => {
-    let new_user = user.replaceAll("来一杯","来亿杯")
-   if (guests.includes(user)){
-     drrr.low("欢迎光临 " + new_user +"，这次需要喝什么呢？还是来一次占卜？");
-   }else{
-      guests.push(user);
-      drrr.low("欢迎光临 " + new_user +"，有什么需要的吗？|输入「来一杯 饮品」来获取随机推荐，或「来一杯 忘忧」自定义饮品。|输入「牌阵列表」可以查询如何占卜，对照「」内文字输入即可触发。|");
-    }
-}
 
 
 
