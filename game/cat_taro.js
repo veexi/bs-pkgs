@@ -608,7 +608,7 @@ event[msg, me, dm, low](user, cont: "(几円|幾円)", tc, url, req) => {
     if (command != "几円" && command.indexOf("给我几円") !== 0 && command.indexOf("想要几円") !== 0) return;
     let amount = 1 + Math.floor(Math.random() * 9);
     shrineYen = shrineYen + amount;
-    sendTarotReply(user, req, "猫咖往灵梦的赛钱箱放了 " + amount + " 円。\n今天也要守护好神社！");
+    sendTarotReply(user, req, "忘忧酒馆往灵梦的赛钱箱放了 " + amount + " 円。\n今天也要守护好神社！");
 }
 
 // 员工彩蛋使用明确的口令；本人发起时会收到专属台词。
@@ -620,17 +620,17 @@ event[msg, me, dm, low](user, cont: "(员工彩蛋|員工彩蛋|店长巡店|店
     let reply = "";
 
     if (command == "员工彩蛋") {
-        reply = "【猫咖员工彩蛋】\n店长巡店 · 保安请假\n调酒师特调 · 迎宾欢迎\n帮店员 · 找忠邦";
+        reply = "【忘忧酒馆员工彩蛋】\n店长巡店 · 保安请假\n调酒师特调 · 迎宾欢迎\n帮店员 · 找忠邦";
     } else if (command == "店长巡店") {
         if (name.includes("未凉真夜") || name.includes("末凉真夜"))
-            reply = "店长亲自巡店：灯亮着，猫在，客人也在。今天的营业目标是让大家开心。";
+            reply = "店长亲自巡店：吧台亮着，酒杯备好，客人也在。今天的营业目标是让大家开心。";
         else
             reply = "你敲开店长室。真夜从账本后抬头：巡店可以，先说说今天有什么好消息？";
     } else if (command == "保安请假") {
         if (trip.includes("R82dedyEHM") || (name.includes("з") && name.includes("∠")))
-            reply = "保安队长递上请假条。猫咖批准休息半小时，门口挂上「请轻声入内」。辛苦啦！";
+            reply = "保安队长递上请假条。忘忧酒馆批准休息半小时，门口挂上「请轻声入内」。辛苦啦！";
         else
-            reply = "你替保安队长递交请假条。猫咖批准了：今天大家轮流帮忙看门，让队长歇一会儿。";
+            reply = "你替保安队长递交请假条。忘忧酒馆批准了：今天大家轮流帮忙看门，让队长歇一会儿。";
     } else if (command == "调酒师特调") {
         let drink = drinks[Math.floor(Math.random() * drinks.length)];
         if (name.includes("夜终黎初") || trip.includes("709onw1D"))
@@ -639,7 +639,7 @@ event[msg, me, dm, low](user, cont: "(员工彩蛋|員工彩蛋|店长巡店|店
             reply = "吧台送上今日推荐「" + drink.name + "」。调酒师补充：欣赏酒可以，尾巴请勿碰。";
     } else if (command == "迎宾欢迎") {
         if (name.includes("请尽情享受"))
-            reply = "迎宾亲自摇响门铃：欢迎光临猫咖！请尽情享受今天的时光。";
+            reply = "迎宾亲自摇响门铃：欢迎光临忘忧酒馆！请尽情享受今天的时光。";
         else
             reply = "门口的迎宾替你推开门，送上一句：欢迎光临，请尽情享受！";
     } else if (command == "帮店员") {
