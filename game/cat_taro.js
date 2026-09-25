@@ -398,28 +398,57 @@ let minorSuits = [
     {"name": "大地", "upright": "重点落在工作、金钱、健康与实际资源。", "reversed": "留意资源不足、进度拖延或基础不稳，先检查现实条件。"}
 ];
 
-let makeMinorSuit = (suit) => {
-    return minorRanks.map((rank) => {
-        return {
+// 用脚本内的循环构造牌组，避免依赖解释器对 map/concat 返回值的处理。
+let minorArcana = [];
+let suitIndex = 0;
+while (suitIndex < minorSuits.length) {
+    let suit = minorSuits[suitIndex];
+    let rankIndex = 0;
+    while (rankIndex < minorRanks.length) {
+        let rank = minorRanks[rankIndex];
+        minorArcana.push({
             "name": suit.name + rank[0],
             "positions": {
                 "正位": rank[1] + suit.upright,
                 "逆位": rank[2] + suit.reversed
             }
-        };
-    });
-};
+        });
+        rankIndex++;
+    }
+    suitIndex++;
+}
 
-let minorArcana = makeMinorSuit(minorSuits[0])
-    .concat(makeMinorSuit(minorSuits[1]))
-    .concat(makeMinorSuit(minorSuits[2]))
-    .concat(makeMinorSuit(minorSuits[3]));
-let fullTarotDeck = tarotCards.concat(minorArcana);
+let fullTarotDeck = [];
+let deckIndex = 0;
+while (deckIndex < tarotCards.length) {
+    fullTarotDeck.push(tarotCards[deckIndex]);
+    deckIndex++;
+}
+deckIndex = 0;
+while (deckIndex < minorArcana.length) {
+    fullTarotDeck.push(minorArcana[deckIndex]);
+    deckIndex++;
+}
 
 // README 约定的「是否抉择」使用 27 张牌：22 张大阿尔卡纳、四张首牌和海洋九。
 let yesMajorNames = ["O·猫", "I·猫法师", "III·猫皇后", "IV·猫皇帝", "VII·战车", "XI·后果", "XVII·星星", "XIX·太阳", "XXI·世界"];
 let noMajorNames = ["VIII·力量", "IX·隐者", "XII·漂浮的猫", "XIII·死神", "XIV·优雅", "XV·猫妖", "XVI·高塔"];
-let decisionDeck = tarotCards.concat(minorArcana.filter((card) => ["火焰首牌", "海洋首牌", "天空首牌", "大地首牌", "海洋九"].includes(card.name)));
+let decisionDeck = [];
+deckIndex = 0;
+while (deckIndex < tarotCards.length) {
+    decisionDeck.push(tarotCards[deckIndex]);
+    deckIndex++;
+}
+deckIndex = 0;
+while (deckIndex < minorArcana.length) {
+    let card = minorArcana[deckIndex];
+    if (card.name == "火焰首牌" || card.name == "海洋首牌" ||
+        card.name == "天空首牌" || card.name == "大地首牌" ||
+        card.name == "海洋九") {
+        decisionDeck.push(card);
+    }
+    deckIndex++;
+}
 
 let normalizeTraditionalText = (text) => {
     return text.replaceAll("來", "来")
@@ -443,10 +472,15 @@ let commandAtStart = (text, keyword) => {
 };
 
 let drawTarotCards = (deck, count) => {
-    if (count <= 0 || deck.length === 0) return [];
-    let card = deck[Math.floor(Math.random() * deck.length)];
-    let remaining = deck.filter((item) => item.name !== card.name);
-    return [card].concat(drawTarotCards(remaining, count - 1));
+    let drawn = [];
+    let remaining = deck;
+    while (count > 0 && remaining.length > 0) {
+        let card = remaining[Math.floor(Math.random() * remaining.length)];
+        drawn.push(card);
+        remaining = remaining.filter((item) => item.name !== card.name);
+        count--;
+    }
+    return drawn;
 };
 
 let sendTarotReply = (user, req, message) => {
