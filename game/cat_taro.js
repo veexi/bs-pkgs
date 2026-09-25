@@ -914,7 +914,7 @@ event[msg, me, dm, low](user, cont: "(牌阵列表|牌陣列表)", tc, url, req)
     }
     if (command.indexOf("牌阵列表") !== 0 && command.indexOf("牌阵列表") !== 1) return;
     // 房间的新消息显示在上方，倒序发送后列表才能从上往下阅读。
-    sendTarotReply(user, req, "【常用牌阵】\n• 今日压力展开法\n• 明日压力展开法\n• 今日工作展开法\n• 明日工作展开法\n• 快速解答展开法");
+    sendTarotReply(user, req, "【常用牌阵】\n• 今日压力展开法\n• 明日压力展开法\n• 今日工作展开法\n• 明日工作展开法\n• 快速解答展开法\n【单张抽牌】\n简：猫Taro／猫塔罗\n繁：貓Taro／貓塔羅");
     sendTarotReply(user, req, "【新增牌阵】\n• 是否抉择展开法\n• 浪漫情怀展开法\n• 三张是否抉择展开法");
     sendTarotReply(user, req, "【猫塔罗 · 牌阵列表】");
 }
