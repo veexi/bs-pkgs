@@ -469,7 +469,17 @@ let normalizeTraditionalText = (text) => {
         .replaceAll("給", "给")
         .replaceAll("麗", "丽")
         .replaceAll("靈", "灵")
-        .replaceAll("幾", "几");
+        .replaceAll("幾", "几")
+        .replaceAll("長", "长")
+        .replaceAll("請", "请")
+        .replaceAll("調", "调")
+        .replaceAll("師", "师")
+        .replaceAll("賓", "宾")
+        .replaceAll("歡", "欢")
+        .replaceAll("幫", "帮")
+        .replaceAll("員", "员")
+        .replaceAll("尋", "寻")
+        .replaceAll("終", "终");
 };
 
 let commandAtStart = (text, keyword) => {
@@ -599,6 +609,52 @@ event[msg, me, dm, low](user, cont: "(几円|幾円)", tc, url, req) => {
     let amount = 1 + Math.floor(Math.random() * 9);
     shrineYen = shrineYen + amount;
     sendTarotReply(user, req, "猫咖往灵梦的赛钱箱放了 " + amount + " 円。\n今天也要守护好神社！");
+}
+
+// 员工彩蛋使用明确的口令；本人发起时会收到专属台词。
+event[msg, me, dm, low](user, cont: "(员工彩蛋|員工彩蛋|店长巡店|店長巡店|保安请假|保安請假|调酒师特调|調酒師特調|迎宾欢迎|迎賓歡迎|帮店员|幫店員|找忠邦|寻找忠邦|尋找忠邦)", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    let command = normalizeTraditionalText(cont).trim();
+    let name = normalizeTraditionalText(user);
+    let trip = String(tc || "");
+    let reply = "";
+
+    if (command == "员工彩蛋") {
+        reply = "【猫咖员工彩蛋】\n店长巡店 · 保安请假\n调酒师特调 · 迎宾欢迎\n帮店员 · 找忠邦";
+    } else if (command == "店长巡店") {
+        if (name.includes("未凉真夜") || name.includes("末凉真夜"))
+            reply = "店长亲自巡店：灯亮着，猫在，客人也在。今天的营业目标是让大家开心。";
+        else
+            reply = "你敲开店长室。真夜从账本后抬头：巡店可以，先说说今天有什么好消息？";
+    } else if (command == "保安请假") {
+        if (trip.includes("R82dedyEHM") || (name.includes("з") && name.includes("∠")))
+            reply = "保安队长递上请假条。猫咖批准休息半小时，门口挂上「请轻声入内」。辛苦啦！";
+        else
+            reply = "你替保安队长递交请假条。猫咖批准了：今天大家轮流帮忙看门，让队长歇一会儿。";
+    } else if (command == "调酒师特调") {
+        let drink = drinks[Math.floor(Math.random() * drinks.length)];
+        if (name.includes("夜终黎初") || trip.includes("709onw1D"))
+            reply = "调酒师举起摇壶：今天推荐「" + drink.name + "」！愿酒馆越来越好，也请大家别碰我的尾巴。";
+        else
+            reply = "吧台送上今日推荐「" + drink.name + "」。调酒师补充：欣赏酒可以，尾巴请勿碰。";
+    } else if (command == "迎宾欢迎") {
+        if (name.includes("请尽情享受"))
+            reply = "迎宾亲自摇响门铃：欢迎光临猫咖！请尽情享受今天的时光。";
+        else
+            reply = "门口的迎宾替你推开门，送上一句：欢迎光临，请尽情享受！";
+    } else if (command == "帮店员") {
+        if (name == "huarrimaru")
+            reply = "huarrimaru 收到一份支援：桌子擦好了，餐盘也摆齐了。今天终于能喘口气啦。";
+        else
+            reply = "你帮 huarrimaru 收好餐盘、擦亮桌面。店员向你道谢：有空再来帮忙呀！";
+    } else if (command == "找忠邦" || command == "寻找忠邦") {
+        if (name == "忠邦")
+            reply = "幽灵店员忠邦从储藏室现身：我一直在上班！顺便问一句，工资什么时候发？";
+        else
+            reply = "你在吧台后找到幽灵店员忠邦。他轻轻敲了敲工资条：我今天也有好好上班哦。";
+    }
+
+    if (reply != "") sendTarotReply(user, req, reply);
 }
 
 let index = 0;
