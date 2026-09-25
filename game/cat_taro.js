@@ -486,17 +486,20 @@ let drawTarotCards = (deck, count) => {
 let splitReply = (message) => {
     let remaining = String(message);
     let parts = [];
-    while (remaining.length > 139) {
-        let end = 120;
+    while (remaining.length > 100) {
+        let count = Math.ceil(remaining.length / 90);
+        let end = Math.ceil(remaining.length / count);
+        let min = Math.max(end - 15, remaining.length - (count - 1) * 100);
+        let max = Math.min(90, end + 10);
         let boundary = 0;
-        let i = end;
-        while (i >= 70 && boundary == 0) {
+        let i = max;
+        while (i >= min && boundary == 0) {
             if ("。！？；\n".includes(remaining[i - 1])) boundary = i;
             i--;
         }
         if (boundary == 0) {
-            i = end;
-            while (i >= 70 && boundary == 0) {
+            i = max;
+            while (i >= min && boundary == 0) {
                 if ("，、, ".includes(remaining[i - 1])) boundary = i;
                 i--;
             }
