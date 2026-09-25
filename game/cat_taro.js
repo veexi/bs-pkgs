@@ -578,14 +578,18 @@ event[msg, me, dm, low](user, cont: "(赛钱|賽錢|香火钱|香火錢|给灵�
     shrineYen = shrineYen + amount;
     let thanks = ["灵梦：今天的晚饭有着落了！", "赛钱箱终于叮当响了！", "灵梦：这份心意我收下啦。"];
     let reply = thanks[Math.floor(Math.random() * thanks.length)];
-    sendTarotReply(user, req, user + "往博丽神社的赛钱箱投入 " + amount + " 円。\n香火箱累计：" + shrineYen + " 円。" + reply);
+    sendTarotReply(user, req, user + "往博丽神社的赛钱箱投入 " + amount + " 円。\n" + reply);
 }
 
 event[msg, me, dm, low](user, cont: "(赛钱箱|賽錢箱|香火箱)", tc, url, req) => {
     if (user == drrr.user.name) return;
     let command = normalizeTraditionalText(cont).trim();
     if (command != "赛钱箱" && command != "香火箱") return;
-    sendTarotReply(user, req, "博丽神社的香火箱里有 " + shrineYen + " 円虚拟赛钱。灵梦正在认真点数。");
+    if (normalizeTraditionalText(user) != "博丽灵梦") {
+        sendTarotReply(user, req, "神社的赛钱账本只给灵梦看哦。");
+        return;
+    }
+    sendChunkedDm(user, "博丽神社的香火箱里有 " + shrineYen + " 円虚拟赛钱。灵梦正在认真点数。");
 }
 
 event[msg, me, dm, low](user, cont: "(几円|幾円)", tc, url, req) => {
@@ -594,7 +598,7 @@ event[msg, me, dm, low](user, cont: "(几円|幾円)", tc, url, req) => {
     if (command != "几円" && command.indexOf("给我几円") !== 0 && command.indexOf("想要几円") !== 0) return;
     let amount = 1 + Math.floor(Math.random() * 9);
     shrineYen = shrineYen + amount;
-    sendTarotReply(user, req, "猫咖往灵梦的赛钱箱放了 " + amount + " 円。\n香火箱累计：" + shrineYen + " 円。今天也要守护好神社！");
+    sendTarotReply(user, req, "猫咖往灵梦的赛钱箱放了 " + amount + " 円。\n今天也要守护好神社！");
 }
 
 let index = 0;
