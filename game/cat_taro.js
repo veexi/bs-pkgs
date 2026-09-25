@@ -463,7 +463,13 @@ let normalizeTraditionalText = (text) => {
         .replaceAll("擇", "择")
         .replaceAll("懷", "怀")
         .replaceAll("張", "张")
-        .replaceAll("選", "选");
+        .replaceAll("選", "选")
+        .replaceAll("賽", "赛")
+        .replaceAll("錢", "钱")
+        .replaceAll("給", "给")
+        .replaceAll("麗", "丽")
+        .replaceAll("靈", "灵")
+        .replaceAll("幾", "几");
 };
 
 let commandAtStart = (text, keyword) => {
@@ -538,6 +544,58 @@ let sendTarotReply = (user, req, message) => {
     if (req && req.type == "dm") sendChunkedDm(user, message);
     else sendChunkedLow(message);
 };
+
+// 博丽神社的虚拟赛钱只在当前脚本运行期间累计。
+let shrineYen = 0;
+
+event[msg, me, dm, low](user, cont: "(赛钱|賽錢|香火钱|香火錢|给灵梦|給靈夢|给博丽灵梦|給博麗靈夢)", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    let command = normalizeTraditionalText(cont).trim();
+    if (command == "赛钱箱") return;
+    let amountText = "";
+    if (command.indexOf("给博丽灵梦") === 0) amountText = command.slice(5).trim();
+    else if (command.indexOf("给灵梦") === 0) amountText = command.slice(3).trim();
+    else if (command.indexOf("赛钱") === 0) amountText = command.slice(2).trim();
+    else if (command.indexOf("香火钱") === 0) amountText = command.slice(3).trim();
+    else return;
+
+    if (amountText.indexOf("香火钱") === 0) amountText = amountText.slice(3).trim();
+    let unit = amountText[amountText.length - 1];
+    if (unit == "円" || unit == "元") {
+        amountText = amountText.slice(0, amountText.length - 1).trim();
+    }
+    let valid = amountText.length > 0 && amountText.length <= 4;
+    let i = 0;
+    while (i < amountText.length) {
+        if (amountText[i] < "0" || amountText[i] > "9") valid = false;
+        i++;
+    }
+    let amount = Number(amountText);
+    if (!valid || amount < 1 || amount > 9999) {
+        sendTarotReply(user, req, "博丽神社的赛钱箱只收 1～9999 円的虚拟赛钱。试试「赛钱 5円」或「给灵梦 5円」。");
+        return;
+    }
+    shrineYen = shrineYen + amount;
+    let thanks = ["灵梦：今天的晚饭有着落了！", "赛钱箱终于叮当响了！", "灵梦：这份心意我收下啦。"];
+    let reply = thanks[Math.floor(Math.random() * thanks.length)];
+    sendTarotReply(user, req, user + "往博丽神社的赛钱箱投入 " + amount + " 円。\n香火箱累计：" + shrineYen + " 円。" + reply);
+}
+
+event[msg, me, dm, low](user, cont: "(赛钱箱|賽錢箱|香火箱)", tc, url, req) => {
+    if (user == drrr.user.name) return;
+    let command = normalizeTraditionalText(cont).trim();
+    if (command != "赛钱箱" && command != "香火箱") return;
+    sendTarotReply(user, req, "博丽神社的香火箱里有 " + shrineYen + " 円虚拟赛钱。灵梦正在认真点数。");
+}
+
+event[msg, me, dm, low](user, cont: "(几円|幾円)", tc, url, req) => {
+    if (normalizeTraditionalText(user) != "博丽灵梦") return;
+    let command = normalizeTraditionalText(cont).trim();
+    if (command != "几円" && command.indexOf("给我几円") !== 0 && command.indexOf("想要几円") !== 0) return;
+    let amount = 1 + Math.floor(Math.random() * 9);
+    shrineYen = shrineYen + amount;
+    sendTarotReply(user, req, "猫咖往灵梦的赛钱箱放了 " + amount + " 円。\n香火箱累计：" + shrineYen + " 円。今天也要守护好神社！");
+}
 
 let index = 0;
 let contents = ["Tips:请使用「来一杯 饮品／飲品／指定饮品名／自定义」来点单哦", "Tips:「来一份 甜品」可以为您献上一份惊(随)喜(机)甜(食)品(物)哦", "Tips:输入「牌阵列表／牌陣列表」可以查看猫塔罗牌阵哦", "Tips:请尽量不要使用复制来输入指令，复制可能会带入「>」而无法触发哦"];
